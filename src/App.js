@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
 
-import logo from './logo.svg';
 import './App.css';
 
-
+// This is the main app function, with some child functions in it
 function App() {
 
-  const [hdscrs, setHabits] = useState([]);
+  const [habits, setHabits] = useState([]);
 
   useEffect(
     function () {
-    // Function to fetch all IDs from the "Habits" table
-    async function fetchHids() {
+    // Function to fetch all descriptions from the "Habits" table
+    async function fetchHabits() {
       try {
         // Fetch all rows from Habits table
         let { data: habits, error } = await supabase.from("Habits").select("*");
@@ -22,10 +21,9 @@ function App() {
           return;
         }
 
-        // Extract the IDs from the response data
+        // Store habits into the state array
         console.log('habits:', habits);
-        const hdscrs = habits.map(habit => habit.HDscr);
-        setHabits(hdscrs);
+        setHabits(habits);
         
       } catch (error) {
         console.error('Error:', error);
@@ -33,23 +31,38 @@ function App() {
     };
 
     // Call the function to fetch item IDs
-    fetchHids();
-  }, []); // Run the effect only once when the component mounts
+    fetchHabits();
+  }, []);
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
-      <h1>
-        Hello world.
-      </h1>
-      <ul>
-        {hdscrs.map(hdscr => (
-          <li>{hdscr}</li>
-        ))}
-      </ul>
+    <div>
+      <Header/>
+      <div className='main-container'>
+        <ul>
+          {habits.map(habit => (
+            <li key={habit.Hid}>
+              {habit.HDscr} {habit.GoalFq} {habit.GoalFqType}
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
+  );
+}
+
+// Below are child functions that does not need passing data out to the main app function
+
+// Function that constructs the header
+function Header() {
+  const appTitle = "Habit Grit";
+
+  return (
+    <header className="header">
+      <div className="logo">
+        <img src="logo.png" alt="logo" />
+        <h1>{appTitle}</h1>
+      </div>
+    </header>
   );
 }
 
