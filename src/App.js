@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
 
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 // This is the main app function, with some child functions in it
 function App() {
-
+  const [isLoading, setIsLoading] = useState(false);
   const [habits, setHabits] = useState([]);
 
   useEffect(
     function () {
     // Function to fetch all descriptions from the "Habits" table
     async function fetchHabits() {
+
+      setIsLoading(true);
+
       try {
         // Fetch all rows from Habits table
         let { data: habits, error } = await supabase.from("Habits").select("*");
@@ -28,6 +32,8 @@ function App() {
       } catch (error) {
         console.error('Error:', error);
       }
+
+      setIsLoading(false);
     };
 
     // Call the function to fetch item IDs
@@ -38,13 +44,24 @@ function App() {
     <div>
       <Header/>
       <div className='main-container'>
-        <ul>
-          {habits.map(habit => (
-            <li key={habit.Hid}>
-              {habit.HDscr} {habit.GoalFq} {habit.GoalFqType}
-            </li>
-          ))}
-        </ul>
+        {isLoading ? (
+          <Loader />
+        ) : (
+          <table className='table table-hover'>
+            <thead className='table-info'><tr>
+              <th style={{ width: '50%' }}>Habit</th>
+              <th style={{ width: '25%' }}>Goal frequency</th>
+              <th style={{ width: '25%' }}>Per</th>
+            </tr></thead>
+            {habits.map(habit => (
+            <tbody className='table-primary'><tr>
+              <td>{habit.HDscr}</td>
+              <td>{habit.GoalFq}</td>
+              <td>{habit.GoalFqType}</td>
+            </tr></tbody>
+            ))}
+          </table>
+        )}
       </div>
     </div>
   );
@@ -64,6 +81,11 @@ function Header() {
       </div>
     </header>
   );
+}
+
+// Function to display a loading message when awaiting responses
+function Loader() {
+  return <p className="message">Loading...</p>;
 }
 
 export default App;

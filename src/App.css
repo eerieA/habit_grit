@@ -5,19 +5,21 @@
 }
 
 body {
-  background-color: #213555;
+  background-color: #5ca397;
   font-family: "Encode Sans Semi Condensed", sans-serif;
   color: #F0F0F0;
 }
 
 .main-container {
+  display: flex;
+  justify-content: center;
   padding: 48px 64px 0px;
 }
 
 /*Main Layouts*/
 
 .header {
-  background-color: #4F709C;
+  background-color: #E5D283;
   padding-left: 0; /* Add this line to reset padding */
   padding-right: 0;
   margin-bottom: 40px;
@@ -27,6 +29,7 @@ body {
 }
 
 /*Elements*/
+
 .logo {
   display: flex;
   align-items: center;
@@ -35,4 +38,35 @@ body {
 
 .logo img {
   width: 68px;
+  padding: 4px;
+}
+
+/*Overriding Bootstrap table-info*/
+.table-info {
+  --bs-table-color: #000;
+  --bs-table-bg: #cbec9f;
+  --bs-table-border-color: #C5E898;
+  --bs-table-striped-bg: #afd87a;
+  --bs-table-striped-color: #000;
+  --bs-table-active-bg: #8cac62;
+  --bs-table-active-color: #000;
+  --bs-table-hover-bg: #9ec072;
+  --bs-table-hover-color: #000;
+  color: var(--bs-table-color);
+  border-color: var(--bs-table-border-color);
+}
+
+/*Overriding Bootstrap table-primary*/
+.table-primary {
+  --bs-table-color: #000;
+  --bs-table-bg: #a2d393;
+  --bs-table-border-color: #a2d393;
+  --bs-table-striped-bg: #9cca8e;
+  --bs-table-striped-color: #000;
+  --bs-table-active-bg: #92be84;
+  --bs-table-active-color: #000;
+  --bs-table-hover-bg: #92be84;
+  --bs-table-hover-color: #000;
+  color: var(--bs-table-color);
+  border-color: var(--bs-table-border-color);
 }
