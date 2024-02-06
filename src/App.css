@@ -10,12 +10,6 @@ body {
   color: #F0F0F0;
 }
 
-.main-container {
-  display: flex;
-  justify-content: center;
-  padding: 48px 64px 0px;
-}
-
 /*Main Layouts*/
 
 .header {
@@ -26,6 +20,30 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content:flex-start;
+  height: 100vh;
+  padding: 20px 48px 0px;
+}
+
+.top-container,
+.main-container {
+  display: flex;
+  justify-content: space-around;
+  width: 50%;
+  padding: 20px 0px 20px 0px;
+}
+
+.form-container{
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
 }
 
 /*Elements*/

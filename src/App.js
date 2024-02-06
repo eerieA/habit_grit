@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
+import RegistrationForm from './registration.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -43,18 +44,23 @@ function App() {
   return (
     <div>
       <Header/>
-      <div className='main-container'>
+      <div className='main'>
+        <div className='top-container'>
+          <RegistrationForm />
+        </div>
+
+        <div className='main-container'>
         {isLoading ? (
           <Loader />
         ) : (
           <table className='table table-hover'>
-            <thead className='table-info'><tr>
-              <th style={{ width: '50%' }}>Habit</th>
-              <th style={{ width: '25%' }}>Goal frequency</th>
-              <th style={{ width: '25%' }}>Per</th>
+            <thead className='table-info' key="jfkdh3646"><tr>
+              <th style={{ width: '70%' }}>Habit</th>
+              <th style={{ width: '15%' }}>Frequency</th>
+              <th style={{ width: '15%' }}>Per</th>
             </tr></thead>
             {habits.map(habit => (
-            <tbody className='table-primary'><tr>
+            <tbody className='table-primary' key={habit.Hid}><tr>
               <td>{habit.HDscr}</td>
               <td>{habit.GoalFq}</td>
               <td>{habit.GoalFqType}</td>
@@ -62,6 +68,7 @@ function App() {
             ))}
           </table>
         )}
+        </div>
       </div>
     </div>
   );
