@@ -13,7 +13,7 @@ function App() {
   useEffect(
     function () {
     // Function to fetch all descriptions from the "Habits" table
-    async function fetchHabits() {
+    const fetchHabits = async () => {
 
       setIsLoading(true);
 
@@ -27,7 +27,7 @@ function App() {
         }
 
         // Store habits into the state array
-        console.log('habits:', habits);
+        //console.log('habits:', habits);
         setHabits(habits);
         
       } catch (error) {
@@ -83,7 +83,7 @@ function Header() {
   return (
     <header className="header">
       <div className="logo">
-        <img src="logo.png" alt="logo" />
+        <img src="logo512.png" alt="logo" />
         <h1>{appTitle}</h1>
       </div>
     </header>
