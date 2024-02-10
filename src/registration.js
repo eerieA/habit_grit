@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import supabase from "./supabase.js";
+
+const config = require('./config');
 
 // Function that constructs the registration form
 function RegistrationForm() {
@@ -7,32 +8,36 @@ function RegistrationForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegister = async () => {
-    // handleRegister function body
+  const handleRegister = async (e) => {
+    // Prevent page reload. Otherwise the response cannot be received (failed to fetch).
+    e.preventDefault();
+
     console.log('email:', email);
     console.log('password:', password);
+    console.log('API_BASE_URL:', config.API_BASE_URL);
 
+    // Make request
     try {
-      const response = await fetch('http://localhost:3002/signup', {
+      const response = await fetch(`${config.API_BASE_URL}/signup`, 
+      {
         method: 'POST',
         headers: {
-          "Content-Type": "text/plain",
-          "Accept": "*/*"
+          "Content-Type": "application/json",
+          "Accept": "*/*",
+          "Connection": "keep-alive"
         },
-        body: "test"
+        body: JSON.stringify({
+          "email": email,
+          "password": password
+        }),
       });
-      const data = await response.json()
-      console.log("Response:", response);
-      console.log("Response status:", response.status);
-      console.log("Response url:", response.url);
-      console.log("Response json data:", data);
+      const data = await response.json();
       console.log("Response message:", data.message);
     } catch (error) {
       console.error('Error:', error);
     }
 
   };
-
 
   return (
     <form className="form-container" onSubmit={handleRegister}>
