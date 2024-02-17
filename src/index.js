@@ -4,10 +4,15 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    {/* Have to wrap the whole final app in this, otherwise sub apps with G OAuth would not compile */}
+    <GoogleOAuthProvider clientId="824482219984-q02jf9sfm33lnajvg0k4c518o7kmran5.apps.googleusercontent.com">
+      <App />
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
 
