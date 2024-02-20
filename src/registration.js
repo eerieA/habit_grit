@@ -1,31 +1,53 @@
-import React, { useState } from "react";
 import { useGoogleLogin } from '@react-oauth/google';
-
-const config = require('./config');
-const axios = require('axios').default;
+import axios from 'axios';
 
 // Function that constructs the registration form
 function RegistrationForm() {
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log(tokenResponse);
-      const userInfo = await fetch(
-        'https://www.googleapis.com/oauth2/v3/userinfo',
-        { headers: { Authorization: `Bearer ${tokenResponse.access_token}` } },
+
+      const tmpToken = tokenResponse.access_token
+      const userInfo = await axios.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        { headers: { "Authorization": `Bearer ${tokenResponse.access_token}` } },
       );
 
-      const data = await userInfo.json();
-      console.log(data);
-      const localEmail = data.email
-      setEmail(localEmail)
-      console.log("Now local email is:", email);
+      console.log(userInfo.data);
+      const tmpEmail = userInfo.data.email
+      console.log(tmpEmail);
+
+      const signupRes = await axios.post(
+        "https://us-central1-habit-grit.cloudfunctions.net/signupFunction",
+        {
+          email: tmpEmail,
+          password: "password123"
+        },
+        {
+          headers: {
+            "Authorization": `Bearer ${tmpToken}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      console.log(signupRes);
+
     },
     onError: errorResponse => console.log(errorResponse),
   });
+
+  async function testAxios() {
+    const res = await axios.get(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: {
+          "Authorization": "Bearer ya29.a0*"
+        }
+      }
+    );
+    console.log(res);
+  }
 
   return (
     <div className="form-container">
