@@ -4,6 +4,21 @@ import axios from 'axios';
 // Function that constructs the registration form
 function RegistrationForm() {
 
+  function generatePassword(email) {
+    let password = '';
+    for (let i = 0; i < email.length; i++) {
+      let charCode = email.charCodeAt(i);
+      // Each character Unicode multiply by 7 and wrap around A-Z
+      charCode = (charCode * 7) % 26 + 65;
+      password += String.fromCharCode(charCode);
+    }
+
+    // Add some random characters or digits to make it less predictable
+    const randomChars = Math.random().toString(36).slice(2, 8);
+
+    return password + randomChars;
+  }
+
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log(tokenResponse);
@@ -14,15 +29,14 @@ function RegistrationForm() {
         { headers: { "Authorization": `Bearer ${tokenResponse.access_token}` } },
       );
 
-      console.log(userInfo.data);
-      const tmpEmail = userInfo.data.email
-      console.log(tmpEmail);
+      const tmpEmail = userInfo.data.email;
+      const tmpPassword = generatePassword(tmpEmail);
 
       const signupRes = await axios.post(
         "https://us-central1-habit-grit.cloudfunctions.net/signupFunction",
         {
           email: tmpEmail,
-          password: "password123"
+          password: tmpPassword
         },
         {
           headers: {
@@ -36,18 +50,6 @@ function RegistrationForm() {
     },
     onError: errorResponse => console.log(errorResponse),
   });
-
-  async function testAxios() {
-    const res = await axios.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          "Authorization": "Bearer ya29.a0*"
-        }
-      }
-    );
-    console.log(res);
-  }
 
   return (
     <div className="form-container">
