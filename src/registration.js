@@ -38,7 +38,9 @@ function RegistrationForm() {
   });
 
   const handleRegister = async (e) => {
+    // Prevent page reload. Otherwise the response cannot be received (failed to fetch).
     e.preventDefault();
+    // Then call the function doing Google auth
     googleLogin();
   }
 
