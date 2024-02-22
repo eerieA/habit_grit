@@ -1,23 +1,10 @@
 import { useGoogleLogin } from '@react-oauth/google';
+import React, { useState } from "react";
 import axios from 'axios';
 
 // Function that constructs the registration form
 function RegistrationForm() {
-
-  function generatePassword(email) {
-    let password = '';
-    for (let i = 0; i < email.length; i++) {
-      let charCode = email.charCodeAt(i);
-      // Each character Unicode multiply by 7 and wrap around A-Z
-      charCode = (charCode * 7) % 26 + 65;
-      password += String.fromCharCode(charCode);
-    }
-
-    // Add some random characters or digits to make it less predictable
-    const randomChars = Math.random().toString(36).slice(2, 8);
-
-    return password + randomChars;
-  }
+  const [password, setPassword] = useState('');
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -30,13 +17,12 @@ function RegistrationForm() {
       );
 
       const tmpEmail = userInfo.data.email;
-      const tmpPassword = generatePassword(tmpEmail);
 
       const signupRes = await axios.post(
         "https://us-central1-habit-grit.cloudfunctions.net/signupFunction",
         {
           email: tmpEmail,
-          password: tmpPassword
+          password: password
         },
         {
           headers: {
@@ -51,11 +37,22 @@ function RegistrationForm() {
     onError: errorResponse => console.log(errorResponse),
   });
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    googleLogin();
+  }
+
   return (
     <div className="form-container">
       <h3>User info</h3>
       <p>Seems you are not signed in...</p>
-      <button className="btn btn-info" onClick={() => googleLogin()}>👀 Sign in with Google</button>
+      <form className="form-container" onSubmit={handleRegister}>
+        <label>Enter password for this app:</label>
+        <input type="password" className="form-control" value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          id="InputPassword" placeholder="Enter password" />
+        <button type="submit" className="btn btn-info">And Google sign in 👀</button>
+      </form>
     </div>
   );
 }
