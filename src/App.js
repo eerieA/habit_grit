@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
-import RegistrationForm from './registration.js';
+import SignInForm from './signIn.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -46,7 +46,7 @@ function App() {
       <Header/>
       <div className='main'>
         <div className='top-container'>
-          <RegistrationForm />
+          <SignInForm />
         </div>
 
         <div className='main-container'>

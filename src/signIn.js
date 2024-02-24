@@ -3,8 +3,14 @@ import React, { useState } from "react";
 import axios from 'axios';
 
 // Function that constructs the registration form
-function RegistrationForm() {
+function SignInForm() {
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [password, setPassword] = useState('');
+
+  const handleSignIn = async () => {
+    // Currentlyl just set local variable as true
+    setIsSignedIn(true);
+  };
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -31,7 +37,12 @@ function RegistrationForm() {
           }
         }
       );
-      console.log(signupRes);
+      //console.log(signupRes);
+
+      // If sign-up was successful, set the user as signed in
+      if (signupRes.status === 200) {
+        handleSignIn();
+      }
 
     },
     onError: errorResponse => console.log(errorResponse),
@@ -46,17 +57,24 @@ function RegistrationForm() {
 
   return (
     <div className="form-container">
-      <h3>User info</h3>
-      <p>Seems you are not signed in...</p>
-      <form className="form-container" onSubmit={handleRegister}>
-        <label>Enter password for this app:</label>
-        <input type="password" className="form-control" value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          id="InputPassword" placeholder="Enter password" />
-        <button type="submit" className="btn btn-info">And Google sign in 👀</button>
-      </form>
+      {isSignedIn? (
+        <p>Signed in</p>
+      ) : (
+        <>
+        <h3>User info</h3>
+        <p>Seems you are not signed in...</p>
+        <form className="form-container" onSubmit={handleRegister}>
+          <label>Enter password for this app:</label>
+          <input type="password" className="form-control" value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            id="InputPassword" placeholder="Enter password" />
+          <button type="submit" className="btn btn-info">And Google sign in 👀</button>
+        </form>
+        </>
+      )
+      }
     </div>
   );
 }
 
-export default RegistrationForm;
+export default SignInForm;
