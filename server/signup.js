@@ -1,8 +1,3 @@
-/* exports.welcome = async (req, res) => {
-    return res.status(200).send({ message: 'Hello world' });
-}
- */
-
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
 
@@ -72,7 +67,7 @@ exports.signup = async (req, res) => {
 
         console.log('User signed up successfully:', data);
         console.log('data.user:', data.user);
-        return res.status(200).send({ message: 'User signed up successfully' });
+        return res.status(200).send({ uid: data.user.id });
     } catch (error) {
         console.error('Error:', error);
         return res.status(500).send({ error: 'Internal server error' });
