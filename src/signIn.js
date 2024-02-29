@@ -1,21 +1,31 @@
 import { useGoogleLogin } from '@react-oauth/google';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
-// Function that constructs the registration form
+function UserProfile({ uid }) {
+  // uid is passed in as a prop from the caller, so there has to be curly brackets in the signature here
+  return <p>Signed in {uid}</p>
+}
+
+// Function that constructs the sign in/up form
 function SignInForm() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [password, setPassword] = useState('');
+  const [localUid, setLocalUid] = useState('');
 
-  const handleSignIn = async () => {
-    // Currentlyl just set local variable as true
+  useEffect(() => {
+    // This effect will be triggered whenever uid changes
+    console.log("Local uid is", localUid);
+  }, [localUid]);
+
+  const handleSignIn = async (uid) => {
+    // Set local variables
     setIsSignedIn(true);
+    setLocalUid(uid);
   };
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log(tokenResponse);
-
       const tmpToken = tokenResponse.access_token
       const userInfo = await axios.get(
         "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -48,8 +58,9 @@ function SignInForm() {
 
       if (signupRes) {
         if (signupRes.status === 200) {
-          // If sign-up was successful, set the user as signed in
-          handleSignIn();
+          // If sign up or sign in was successful, get uid, and set the user as signed in
+          const uid = signupRes.data.uid;
+          handleSignIn(uid);
         }
       }
 
@@ -66,8 +77,10 @@ function SignInForm() {
 
   return (
     <div className="form-container">
-      {isSignedIn ? (
-        <p>Signed in</p>
+      {localUid !== '' ? (
+        <>
+          <UserProfile uid={localUid} />
+        </>
       ) : (
         <>
           <h3>User info</h3>
