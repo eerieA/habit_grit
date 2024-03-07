@@ -25,9 +25,16 @@ function App() {
 
       setIsLoading(true);
 
+      // Defaults to the test User's Uid
+      var tmpUid = 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516';
+      if (localUid !== '') {
+        tmpUid = localUid;
+        console.log("[App.js]::useEffect Local uid is", localUid);
+      }
+
       try {
-        // Fetch rows from Habits table where the Uid corresponds to the test User
-        let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
+        // Fetch rows from Habits table where the Uid corresponds to the tmpUid
+        let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', tmpUid);
 
         if (error) {
           console.error('Error fetching habits from Supabase:', error);
@@ -47,7 +54,7 @@ function App() {
 
     // Call the function to fetch item IDs
     fetchHabits();
-  }, []);
+  }, [localUid]);
 
   const handleUserInfoChange = (newUid, newEmail) => {
     setLocalUid(newUid);

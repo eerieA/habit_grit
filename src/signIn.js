@@ -2,14 +2,6 @@ import { useGoogleLogin } from '@react-oauth/google';
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
-function UserProfile({ userInfo }) {
-  // userInfo is passed in as a prop from the caller, so there has to be curly brackets in the signature here
-  // Then after unpacking, it is still a dictionary, so just use dot to access members
-  return (
-  <p>Signed in {userInfo.uid} as {userInfo.email}</p>
-  );
-}
-
 // Function that constructs the sign in/up form
 function SignInForm({ onUserInfoFetched }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -110,3 +102,13 @@ function SignInForm({ onUserInfoFetched }) {
 }
 
 export default SignInForm;
+
+// Below are child functions that does not need passing data out to the main app function
+
+function UserProfile({ userInfo }) {
+  // userInfo is passed in as a prop from the caller, so there has to be curly brackets in the signature here
+  // Then after unpacking, it is still a dictionary, so just use dot to access members
+  return (
+  <p>Hello {userInfo.email}!</p>
+  );
+}
