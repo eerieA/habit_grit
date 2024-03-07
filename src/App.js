@@ -9,6 +9,14 @@ import './App.css';
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [habits, setHabits] = useState([]);
+  const [localUid, setLocalUid] = useState('');
+  const [localEmail, setLocalEmail] = useState('');
+
+  useEffect(() => {
+    // This effect will be triggered whenever uid changes
+    console.log("[App.js] Local uid is", localUid);
+    console.log("[App.js] Local email is", localEmail);
+  }, [localUid, localEmail]);
 
   useEffect(
     function () {
@@ -18,8 +26,8 @@ function App() {
       setIsLoading(true);
 
       try {
-        // Fetch all rows from Habits table
-        let { data: habits, error } = await supabase.from("Habits").select("*");
+        // Fetch rows from Habits table where the Uid corresponds to the test User
+        let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
 
         if (error) {
           console.error('Error fetching habits from Supabase:', error);
@@ -41,12 +49,17 @@ function App() {
     fetchHabits();
   }, []);
 
+  const handleUserInfoChange = (newUid, newEmail) => {
+    setLocalUid(newUid);
+    setLocalEmail(newEmail);
+  }
+
   return (
     <div>
       <Header/>
       <div className='main'>
         <div className='top-container'>
-          <SignInForm />
+          <SignInForm onUserInfoFetched={ handleUserInfoChange }/>
         </div>
 
         <div className='main-container'>

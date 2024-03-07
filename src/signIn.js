@@ -2,26 +2,35 @@ import { useGoogleLogin } from '@react-oauth/google';
 import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
-function UserProfile({ uid }) {
-  // uid is passed in as a prop from the caller, so there has to be curly brackets in the signature here
-  return <p>Signed in {uid}</p>
+function UserProfile({ userInfo }) {
+  // userInfo is passed in as a prop from the caller, so there has to be curly brackets in the signature here
+  // Then after unpacking, it is still a dictionary, so just use dot to access members
+  return (
+  <p>Signed in {userInfo.uid} as {userInfo.email}</p>
+  );
 }
 
 // Function that constructs the sign in/up form
-function SignInForm() {
+function SignInForm({ onUserInfoFetched }) {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [password, setPassword] = useState('');
   const [localUid, setLocalUid] = useState('');
+  const [localEmail, setLocalEmail] = useState('');
 
   useEffect(() => {
     // This effect will be triggered whenever uid changes
-    console.log("Local uid is", localUid);
-  }, [localUid]);
+    console.log("[signin.js] Local uid is", localUid);
+    console.log("[signin.js] Local email is", localEmail);
+  }, [localUid, localEmail]);
 
-  const handleSignIn = async (uid) => {
+  const handleSignIn = async (uid, email) => {
     // Set local variables
     setIsSignedIn(true);
     setLocalUid(uid);
+    setLocalEmail(email);
+
+    // Use the function pointer to call the function in App.js
+    onUserInfoFetched(uid, email)
   };
 
   const googleLogin = useGoogleLogin({
@@ -48,8 +57,8 @@ function SignInForm() {
         }
       ).catch(function (error) {
         // handle error
-        console.log("error within catch:", error);
         if (error.response.status === 400) {
+          // 400 from the cloud function means wrong password
           alert(error.response.data.error);
         } else {
           alert(error.response.data.error);
@@ -60,7 +69,8 @@ function SignInForm() {
         if (signupRes.status === 200) {
           // If sign up or sign in was successful, get uid, and set the user as signed in
           const uid = signupRes.data.uid;
-          handleSignIn(uid);
+          const email = signupRes.data.email;
+          handleSignIn(uid, email);
         }
       }
 
@@ -77,13 +87,13 @@ function SignInForm() {
 
   return (
     <div className="form-container">
+    <h3>User info</h3>
       {localUid !== '' ? (
         <>
-          <UserProfile uid={localUid} />
+          <UserProfile userInfo={{uid:localUid, email:localEmail}} />
         </>
       ) : (
         <>
-          <h3>User info</h3>
           <p>Seems you are not signed in...</p>
           <form className="form-container" onSubmit={handleRegister}>
             <label>Enter password for this app:</label>

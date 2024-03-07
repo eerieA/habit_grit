@@ -56,8 +56,8 @@ exports.signup = async (req, res) => {
                 }
 
                 console.log('User signed in successfully:', data.user);
-                // On success, return the user's UID to the frontend
-                return res.status(200).send({ uid: data.user.id });
+                // On success, return the user's Uid and email to the frontend
+                return res.status(200).send({ uid: data.user.id, email: data.user.email });
             } else {
                 console.log(error.message);
                 console.error('Error signing up user:', error);
