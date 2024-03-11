@@ -4,6 +4,7 @@ import axios from 'axios';
 
 // Function that constructs the sign in/up form
 function SignInForm({ onUserInfoFetched }) {
+  const [isLoading, setIsLoading] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [password, setPassword] = useState('');
   const [localUid, setLocalUid] = useState('');
@@ -27,6 +28,8 @@ function SignInForm({ onUserInfoFetched }) {
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
+      setIsLoading(true);
+
       const tmpToken = tokenResponse.access_token
       const userInfo = await axios.get(
         "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -66,6 +69,8 @@ function SignInForm({ onUserInfoFetched }) {
         }
       }
 
+      setIsLoading(false);
+
     },
     onError: errorResponse => console.log("errorResponse:", errorResponse),
   });
@@ -79,10 +84,18 @@ function SignInForm({ onUserInfoFetched }) {
 
   return (
     <div className="form-container">
-    <h3>User info</h3>
+      <h3>User info</h3>
+
+      {isLoading ? (
+        <Loader />
+      ) : (
+        <></>
+      )
+      }
+
       {localUid !== '' ? (
         <>
-          <UserProfile userInfo={{uid:localUid, email:localEmail}} />
+          <UserProfile userInfo={{ uid: localUid, email: localEmail }} />
         </>
       ) : (
         <>
@@ -109,6 +122,11 @@ function UserProfile({ userInfo }) {
   // userInfo is passed in as a prop from the caller, so there has to be curly brackets in the signature here
   // Then after unpacking, it is still a dictionary, so just use dot to access members
   return (
-  <p>Hello {userInfo.email}!</p>
+    <p>Hello {userInfo.email}!</p>
   );
+}
+
+// Function to display a loading message when awaiting responses
+function Loader() {
+  return <p className="message">Loading...</p>;
 }
