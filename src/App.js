@@ -71,7 +71,7 @@ function App() {
 
         <div className='main-container'>
           {isSignedIn ? (
-            <AddHabitForm />
+            <AddHabitForm uid={localUid} />
           ) : (
             <div>(Sign in to add your habits)</div>
           )}
@@ -127,11 +127,23 @@ function Loader() {
   return <p className="message">Loading...</p>;
 }
 
-function AddHabitForm() {
+function AddHabitForm({ uid }) {
+
+  const handleAddHabit = async () => {
+    console.log("[handleAddHabit] passed in uid is", uid);
+    const { data, error } = await supabase
+      .from('Habits')
+      .insert([
+        { Uid: 'd40f2d93-81c0-4749-9ba9-614923845be1', GoalFq: 3, GoalFqType: 'W', HDscr: 'Test description' },
+      ])
+      .select();
+    console.log("[handleAddHabit] data is", data);
+  };
+
   return (
     <div className='form-container'>
       Add a habit
-      <button type="button" className="btn btn-info">Add</button>
+      <button type="button" className="btn btn-info" onClick={handleAddHabit}>Add</button>
     </div>
   )
 }
