@@ -42,8 +42,9 @@ body {
 .form-container{
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  align-items: center;
   gap: 10px;
+  text-wrap: wrap;
 }
 
 /*Elements*/
@@ -87,4 +88,9 @@ body {
   --bs-table-hover-color: #000;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
+}
+
+.text-error{
+  color: #fffae8;
+  background-color: #e08189;
 }

@@ -128,22 +128,70 @@ function Loader() {
 }
 
 function AddHabitForm({ uid }) {
+  const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
+  const [hDescription, setHDescription] = useState('');
+  const [hFrequency, setHFrequency] = useState('');
+  const [hFqType, setHFqType] = useState('W');
+  const [formSumbmitError, setFormSumbmitError] = useState('');
 
-  const handleAddHabit = async () => {
-    console.log("[handleAddHabit] passed in uid is", uid);
+  const openAddHabit = async () => {
+    setIsAddHabitOpen(true);
+  };
+
+  const handleAddHabit = async (e) => {
+    e.preventDefault();
+    
+    console.log("hDescription is", hDescription);
+    console.log("hFrequency is", hFrequency);
+    console.log("hFqType is", hFqType);
+    if (hDescription === '' || hFrequency === '') {
+      setFormSumbmitError("Description or frequency is empty! Please try again.")
+      return;
+    } else {
+      setFormSumbmitError("")
+    }
+    /* console.log("[openAddHabit] passed in uid is", uid);
     const { data, error } = await supabase
       .from('Habits')
       .insert([
-        { Uid: 'd40f2d93-81c0-4749-9ba9-614923845be1', GoalFq: 3, GoalFqType: 'W', HDscr: 'Test description' },
+        { Uid: uid, GoalFq: 2, GoalFqType: 'W', HDscr: 'Test description' },
       ])
       .select();
-    console.log("[handleAddHabit] data is", data);
+    console.log("[openAddHabit] data is", data); */
+
+    setIsAddHabitOpen(false);
   };
 
   return (
     <div className='form-container'>
       Add a habit
-      <button type="button" className="btn btn-info" onClick={handleAddHabit}>Add</button>
+      {formSumbmitError !== '' ? (
+        <form className="form-container">
+          <label className='text-error'>{formSumbmitError}</label>
+        </form>
+      ):( <></> )}
+      {isAddHabitOpen ? (
+        <form className="form-container" onSubmit={handleAddHabit}>
+          <label>Habit Description:</label>
+          <input type="text" className="form-control" value={hDescription}
+            onChange={(e) => setHDescription(e.target.value)}
+            id="InputHDescription" placeholder="Text description" />
+          <label>Target frequency:</label>
+          <input type="number" className="form-control" value={hFrequency}
+            onChange={(e) => setHFrequency(e.target.value)}
+            id="InputHFrequency" placeholder="Days per week/month" />
+          <label>Target frequency type:</label>
+          <select id="InputHFqType" className="form-control" value={hFqType}
+            onChange={(e) => setHFqType(e.target.value)}>
+            <option value="W">Per week</option>
+            <option value="M">Per month</option>
+          </select>
+          <button type="submit" className="btn btn-info">Submit</button>
+        </form>
+      ) : (
+        <button type="button" className="btn btn-info" onClick={openAddHabit}>Add</button>
+      )}
+
     </div>
   )
 }
