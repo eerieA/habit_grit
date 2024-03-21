@@ -5,7 +5,7 @@ import SignInForm from './signIn.js';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-// This is the main app function, with some child functions in it
+// This is the main component App
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [habits, setHabits] = useState([]);
@@ -82,8 +82,8 @@ function App() {
             <Loader />
           ) : (
             <div>
-              <table className='table table-hover'>
-                <thead className='table-info' key="jfkdh3646"><tr>
+              <table className='table table-hover' key="habit-table">
+                <thead className='table-info' key="habit-table-header"><tr>
                   <th style={{ width: '70%' }}>Habit</th>
                   <th style={{ width: '15%' }}>Frequency</th>
                   <th style={{ width: '15%' }}>Per</th>
@@ -106,33 +106,14 @@ function App() {
 
 export default App;
 
-// Below are child functions that does not need passing data out to the main app function
-
-// Function that constructs the header
-function Header() {
-  const appTitle = "Habit Grit";
-
-  return (
-    <header className="header">
-      <div className="logo">
-        <img src="logo512.png" alt="logo" />
-        <h1>{appTitle}</h1>
-      </div>
-    </header>
-  );
-}
-
-// Function to display a loading message when awaiting responses
-function Loader() {
-  return <p className="message">Loading...</p>;
-}
+// Below is child component AddHabitForm
 
 function AddHabitForm({ uid }) {
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
   const [hDescription, setHDescription] = useState('');
   const [hFrequency, setHFrequency] = useState('');
   const [hFqType, setHFqType] = useState('W');
-  const [formSumbmitError, setFormSumbmitError] = useState('');
+  const [formSubmitError, setFormSubmitError] = useState('');
 
   const openAddHabit = async () => {
     setIsAddHabitOpen(true);
@@ -145,19 +126,25 @@ function AddHabitForm({ uid }) {
     console.log("hFrequency is", hFrequency);
     console.log("hFqType is", hFqType);
     if (hDescription === '' || hFrequency === '') {
-      setFormSumbmitError("Description or frequency is empty! Please try again.")
+      setFormSubmitError("Description or frequency is empty! Please try again.")
       return;
     } else {
-      setFormSumbmitError("")
+      setFormSubmitError("")
+
+      /* Call API to insert the habit item */
+      const { data, error } = await supabase
+        .from('Habits')
+        .insert([
+          { Uid: uid, GoalFq: hFrequency, GoalFqType: hFqType, HDscr: hDescription },
+        ])
+        .select();
+      console.log("[openAddHabit] data is", data);
+
+      if (error) {
+        console.error('Error adding habit to Supabase:', error);
+        return;
+      }
     }
-    /* console.log("[openAddHabit] passed in uid is", uid);
-    const { data, error } = await supabase
-      .from('Habits')
-      .insert([
-        { Uid: uid, GoalFq: 2, GoalFqType: 'W', HDscr: 'Test description' },
-      ])
-      .select();
-    console.log("[openAddHabit] data is", data); */
 
     setIsAddHabitOpen(false);
   };
@@ -165,9 +152,9 @@ function AddHabitForm({ uid }) {
   return (
     <div className='form-container'>
       Add a habit
-      {formSumbmitError !== '' ? (
+      {formSubmitError !== '' ? (
         <form className="form-container">
-          <label className='text-error'>{formSumbmitError}</label>
+          <label className='text-error'>{formSubmitError}</label>
         </form>
       ):( <></> )}
       {isAddHabitOpen ? (
@@ -194,4 +181,25 @@ function AddHabitForm({ uid }) {
 
     </div>
   )
+}
+
+// Below are child components that does not need passing data out to the main app function
+
+// Function that constructs the header
+function Header() {
+  const appTitle = "Habit Grit";
+
+  return (
+    <header className="header">
+      <div className="logo">
+        <img src="logo512.png" alt="logo" />
+        <h1>{appTitle}</h1>
+      </div>
+    </header>
+  );
+}
+
+// Function to display a loading message when awaiting responses
+function Loader() {
+  return <p className="message">Loading...</p>;
 }
