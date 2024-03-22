@@ -81,22 +81,7 @@ function App() {
           {isLoading ? (
             <Loader />
           ) : (
-            <div>
-              <table className='table table-hover' key="habit-table">
-                <thead className='table-info' key="habit-table-header"><tr>
-                  <th style={{ width: '70%' }}>Habit</th>
-                  <th style={{ width: '15%' }}>Frequency</th>
-                  <th style={{ width: '15%' }}>Per</th>
-                </tr></thead>
-                {habits.map(habit => (
-                  <tbody className='table-primary' key={habit.Hid}><tr>
-                    <td>{habit.HDscr}</td>
-                    <td>{habit.GoalFq}</td>
-                    <td>{habit.GoalFqType}</td>
-                  </tr></tbody>
-                ))}
-              </table>
-            </div>
+            <HabitsTable habits={habits} />
           )}
         </div>
       </div>
@@ -105,6 +90,35 @@ function App() {
 }
 
 export default App;
+
+
+// Below is child component HabitsTable
+
+function HabitsTable({ habits }) {
+  return (
+    <div>
+      <table className='table table-hover' key="habit-table">
+        <thead className='table-info' key="habit-table-header">
+          <tr>
+            <th style={{ width: '70%' }}>Habit</th>
+            <th style={{ width: '15%' }}>Frequency</th>
+            <th style={{ width: '15%' }}>Per</th>
+          </tr>
+        </thead>
+        {habits.map(habit => (
+          <tbody className='table-primary' key={habit.Hid}>
+            <tr>
+              <td>{habit.HDscr}</td>
+              <td>{habit.GoalFq}</td>
+              <td>{habit.GoalFqType}</td>
+            </tr>
+          </tbody>
+        ))}
+      </table>
+    </div>
+  );
+}
+
 
 // Below is child component AddHabitForm
 
@@ -121,7 +135,7 @@ function AddHabitForm({ uid }) {
 
   const handleAddHabit = async (e) => {
     e.preventDefault();
-    
+
     console.log("hDescription is", hDescription);
     console.log("hFrequency is", hFrequency);
     console.log("hFqType is", hFqType);
@@ -156,7 +170,7 @@ function AddHabitForm({ uid }) {
         <form className="form-container">
           <label className='text-error'>{formSubmitError}</label>
         </form>
-      ):( <></> )}
+      ) : (<></>)}
       {isAddHabitOpen ? (
         <form className="form-container" onSubmit={handleAddHabit}>
           <label>Habit Description:</label>
@@ -182,6 +196,7 @@ function AddHabitForm({ uid }) {
     </div>
   )
 }
+
 
 // Below are child components that does not need passing data out to the main app function
 
