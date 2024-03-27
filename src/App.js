@@ -13,53 +13,52 @@ function App() {
   const [localUid, setLocalUid] = useState('');
   const [localEmail, setLocalEmail] = useState('');
 
-  useEffect(() => {
-    // This effect will be triggered whenever uid changes
-    console.log("[App.js] Local uid is", localUid);
-    console.log("[App.js] Local email is", localEmail);
-  }, [localUid, localEmail]);
-
-  useEffect(() => {
-    // This effect fetches relevant rows from the "Habits" table based on current localUid
-    const fetchHabits = async () => {
-
-      setIsLoading(true);
-
-      // Defaults to the test User's Uid
-      var tmpUid = 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516';
-      if (localUid !== '') {
-        tmpUid = localUid;
-        console.log("[App.js]::useEffect Local uid is", localUid);
-      }
-
-      try {
-        // Fetch rows from Habits table where the Uid corresponds to the tmpUid
-        let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', tmpUid);
-
-        if (error) {
-          console.error('Error fetching habits from Supabase:', error);
-          return;
-        }
-
-        // Store habits into the state array
-        setHabits(habits);
-
-      } catch (error) {
-        console.error('Error:', error);
-      }
-
-      setIsLoading(false);
-    };
-
-    // Call the function to fetch item IDs
-    fetchHabits();
-  }, [localUid]);
-
   const handleUserInfoChange = (newUid, newEmail) => {
     setLocalUid(newUid);
     setLocalEmail(newEmail);
     setIsSignedIn(true);
   }
+
+  const refetchHabits = async (uid) => {
+    setIsLoading(true);
+
+    // Defaults to the test User's Uid
+    var tmpUid = 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516';
+    if (uid !== '') {
+      tmpUid = uid;
+    }
+
+    try {
+      // Fetch rows from Habits table where the Uid corresponds to the tmpUid
+      let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', tmpUid);
+
+      if (error) {
+        console.error('Error fetching habits from Supabase:', error);
+        return;
+      }
+
+      // Store habits into the state array
+      setHabits(habits);
+
+    } catch (error) {
+      console.error('Error:', error);
+    }
+
+    setIsLoading(false);
+  }
+
+  useEffect(() => {
+    // This effect will be triggered whenever localUid and localEmail changes
+    console.log("[App.js] Local uid is", localUid);
+    console.log("[App.js] Local email is", localEmail);
+  }, [localUid, localEmail]);
+
+  useEffect(() => {
+    // This effect is basically triggered on successful user signup/login
+    if (localUid) {
+      refetchHabits(localUid);
+    }
+  }, [localUid]);
 
   return (
     <div>
@@ -71,7 +70,7 @@ function App() {
 
         <div className='main-container'>
           {isSignedIn ? (
-            <AddHabitForm uid={localUid} />
+            <AddHabitForm uid={localUid} onAddHabit={refetchHabits} />
           ) : (
             <div>(Sign in to add your habits)</div>
           )}
@@ -122,7 +121,7 @@ function HabitsTable({ habits }) {
 
 // Below is child component AddHabitForm
 
-function AddHabitForm({ uid }) {
+function AddHabitForm({ uid, onAddHabit }) {
   const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
   const [hDescription, setHDescription] = useState('');
   const [hFrequency, setHFrequency] = useState('');
@@ -136,9 +135,6 @@ function AddHabitForm({ uid }) {
   const handleAddHabit = async (e) => {
     e.preventDefault();
 
-    console.log("hDescription is", hDescription);
-    console.log("hFrequency is", hFrequency);
-    console.log("hFqType is", hFqType);
     if (hDescription === '' || hFrequency === '') {
       setFormSubmitError("Description or frequency is empty! Please try again.")
       return;
@@ -158,6 +154,14 @@ function AddHabitForm({ uid }) {
         console.error('Error adding habit to Supabase:', error);
         return;
       }
+
+      // Call the function pointed to by the argument onAddHabit, which currently refetches the habits table
+      onAddHabit(uid);
+      
+      // Reset fields of the form
+      setHDescription("");
+      setHFrequency("");
+      setHFqType("W");
     }
 
     setIsAddHabitOpen(false);
