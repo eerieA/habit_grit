@@ -128,8 +128,12 @@ function AddHabitForm({ uid, onAddHabit }) {
   const [hFqType, setHFqType] = useState('W');
   const [formSubmitError, setFormSubmitError] = useState('');
 
-  const openAddHabit = async () => {
+  const openAddHabit = () => {
     setIsAddHabitOpen(true);
+  };
+
+  const closeAddHabit = () => {
+    setIsAddHabitOpen(false);
   };
 
   const handleAddHabit = async (e) => {
@@ -157,7 +161,7 @@ function AddHabitForm({ uid, onAddHabit }) {
 
       // Call the function pointed to by the argument onAddHabit, which currently refetches the habits table
       onAddHabit(uid);
-      
+
       // Reset fields of the form
       setHDescription("");
       setHFrequency("");
@@ -168,14 +172,15 @@ function AddHabitForm({ uid, onAddHabit }) {
   };
 
   return (
-    <div className='form-container'>
-      Add a habit
+    <div className='l2-container'>
+      <p className="l2-title">Add a habit</p>
       {formSubmitError !== '' ? (
         <form className="form-container">
           <label className='text-error'>{formSubmitError}</label>
         </form>
       ) : (<></>)}
       {isAddHabitOpen ? (
+        <>
         <form className="form-container" onSubmit={handleAddHabit}>
           <label>Habit Description:</label>
           <input type="text" className="form-control" value={hDescription}
@@ -191,8 +196,12 @@ function AddHabitForm({ uid, onAddHabit }) {
             <option value="W">Per week</option>
             <option value="M">Per month</option>
           </select>
-          <button type="submit" className="btn btn-info">Submit</button>
         </form>
+        <div className='h-dist-container'>
+          <button type="submit" className="btn btn-info">Submit</button>
+          <button type="button" className="btn btn-secondary" onClick={closeAddHabit}>Cancel</button>
+        </div>
+        </>
       ) : (
         <button type="button" className="btn btn-info" onClick={openAddHabit}>Add</button>
       )}

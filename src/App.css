@@ -39,14 +39,6 @@ body {
   padding: 20px 0px 20px 0px;
 }
 
-.form-container{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-wrap: wrap;
-}
-
 /*Elements*/
 
 .logo {
@@ -58,6 +50,33 @@ body {
 .logo img {
   width: 68px;
   padding: 4px;
+}
+
+.l2-container {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.l2-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size:larger;
+}
+
+.h-dist-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0px 10px 0px;
+}
+
+.form-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-wrap: wrap;
 }
 
 /*Overriding Bootstrap table-info*/
