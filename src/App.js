@@ -54,9 +54,12 @@ function App() {
   }, [localUid, localEmail]);
 
   useEffect(() => {
-    // This effect is basically triggered on successful user signup/login
+    // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
+    // it will retrieve some placeholders (example data)
     if (localUid) {
       refetchHabits(localUid);
+    } else {
+      refetchHabits('');
     }
   }, [localUid]);
 
@@ -196,11 +199,11 @@ function AddHabitForm({ uid, onAddHabit }) {
             <option value="W">Per week</option>
             <option value="M">Per month</option>
           </select>
+          <div className='h-dist-container'>
+            <button type="submit" className="btn btn-info">Submit</button>
+            <button type="button" className="btn btn-secondary" onClick={closeAddHabit}>Cancel</button>
+          </div>
         </form>
-        <div className='h-dist-container'>
-          <button type="submit" className="btn btn-info">Submit</button>
-          <button type="button" className="btn btn-secondary" onClick={closeAddHabit}>Cancel</button>
-        </div>
         </>
       ) : (
         <button type="button" className="btn btn-info" onClick={openAddHabit}>Add</button>
