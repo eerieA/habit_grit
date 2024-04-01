@@ -65,19 +65,20 @@ body {
   font-size:larger;
 }
 
-.h-dist-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: 10px 0px 10px 0px;
-}
-
 .form-container{
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 10px;
   text-wrap: wrap;
+}
+
+.h-dist-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0px 10px 0px;
 }
 
 /*Overriding Bootstrap table-info*/
@@ -108,6 +109,11 @@ body {
   --bs-table-hover-color: #000;
   color: var(--bs-table-color);
   border-color: var(--bs-table-border-color);
+}
+
+.btn-stretch{  
+  width: 100%; /* Set width to 100% */
+  flex-grow: 1;
 }
 
 .text-error{

@@ -106,7 +106,7 @@ function SignInForm({ onUserInfoFetched }) {
               onChange={(e) => setPassword(e.target.value)}
               id="InputPassword" placeholder="Enter password" />
             <div className='h-dist-container'>
-              <button type="submit" className="btn btn-info">And Google sign in 👀</button>
+              <button type="submit" className="btn btn-info btn-stretch">And Google sign in 👀</button>
             </div>
           </form>
         </>
