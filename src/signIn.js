@@ -100,12 +100,14 @@ function SignInForm({ onUserInfoFetched }) {
       ) : (
         <>
           <p>Seems you are not signed in...</p>
-          <form className="form-container" onSubmit={handleRegister}>
+          <form className="l2-container" onSubmit={handleRegister}>
             <label>Enter password for this app:</label>
             <input type="password" className="form-control" value={password}
               onChange={(e) => setPassword(e.target.value)}
               id="InputPassword" placeholder="Enter password" />
-            <button type="submit" className="btn btn-info">And Google sign in 👀</button>
+            <div className='h-dist-container'>
+              <button type="submit" className="btn btn-info">And Google sign in 👀</button>
+            </div>
           </form>
         </>
       )
