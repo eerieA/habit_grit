@@ -11,6 +11,8 @@ import './App.css';
 function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [habits, setHabits] = useState([]);
+  const [isHabitsUpdating, setIsHabitsUpdating] = useState(false);
+  const [isHabitsUpdFinished, setIsHabitsUpdFinished] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [localUid, setLocalUid] = useState('');
   const [localEmail, setLocalEmail] = useState('');
@@ -24,15 +26,9 @@ function App() {
   const refetchHabits = async (uid) => {
     setIsLoading(true);
 
-    // Defaults to the test User's Uid
-    var tmpUid = 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516';
-    if (uid !== '') {
-      tmpUid = uid;
-    }
-
     try {
-      // Fetch rows from Habits table where the Uid corresponds to the tmpUid
-      let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', tmpUid);
+      // Fetch rows from Habits table where the Uid corresponds to the passed in Uid
+      let { data: habits, error } = await supabase.from("Habits").select("*").eq('Uid', uid);
 
       if (error) {
         console.error('Error fetching habits from Supabase:', error);
@@ -44,6 +40,7 @@ function App() {
 
       // Then fetch records for each habit from HabitRecords in supabase
       for (let habit of habits) {
+        setIsHabitsUpdating(false);
         let { data: habitRecords, error: recordError } = await supabase
           .from("HabitRecords")
           .select("*")
@@ -57,7 +54,8 @@ function App() {
         // Update current habit by appending an array containing its records
         habit.records = habitRecords;
       }
-      //console.log('Habits with records:', habits);
+      console.log('Habits with records:', habits);
+      setIsHabitsUpdating(true);
 
     } catch (error) {
       console.error('Error:', error);
@@ -73,15 +71,36 @@ function App() {
   }, [localUid, localEmail]);
 
   useEffect(() => {
+    setIsHabitsUpdFinished(true);
+  }, [isHabitsUpdating]);
+
+  useEffect(() => {
     // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
     // it will retrieve some placeholders (example data)
-    if (localUid) {
-      refetchHabits(localUid);
+    if (localUid !== '') {
+      const fetchData = async () => {
+        await refetchHabits(localUid);
+      };
+      fetchData();
     } else {
-      refetchHabits('');
+      const fetchData = async () => {
+        await refetchHabits('d1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
+      };
+      fetchData();
     }
   }, [localUid]);
 
+  useEffect(() => {
+    // This effect is triggered on page load
+    const fetchData = async () => {
+      await refetchHabits('d1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
+    };
+    fetchData();
+    // This state has to be reset to false here, not inside refetchHabits(.)
+    setIsHabitsUpdFinished(false);
+  }, []);
+
+  
   return (
     <div>
       <Header />
@@ -101,8 +120,8 @@ function App() {
         <div className='main-container'>
           {isLoading ? (
             <Loader />
-          ) : (
-            <HabitsTable habits={habits} />
+          ) : (            
+            <HabitsTable habits={habits} isHabitsUpdFinished={isHabitsUpdFinished} />
           )}
         </div>
       </div>
@@ -122,73 +141,76 @@ function getCurrentWeekDates() {
     const date = startOfWeek.add(i, 'day');
     weekDates.push(date);
   }
-  console.log("startOfWeek:", startOfWeek);
-  console.log("weekDates:", weekDates);
   return weekDates;
 }
 
-function HabitsTable({ habits }) {
-
+function HabitsTable({ habits, isHabitsUpdFinished }) {
+  
   const weekDates = getCurrentWeekDates();
 
   return (
     <div>
-    {habits.map(habit => (
-      <table className='table table-hover' key={habit.Hid}>
+      {isHabitsUpdFinished ? (
+      habits.map(habit => (
+        <table className='table table-hover' key={habit.Hid}>
 
-        <thead className='table-info' key={habit.Hid + "-header"}>
-          <tr>
-            <th style={{ width: '64%' }}>Habit</th>
-            <th style={{ width: '12%' }}>Frequency</th>
-            <th style={{ width: '12%' }}>Per</th>
-            <th style={{ width: '12%' }}>Logged</th>
-          </tr>
-        </thead>
-
-        <tbody className='table-primary'>
-          <tr>
-            <td>{habit.HDscr}</td>
-            <td>{habit.GoalFq}</td>
-            {/* This is habit goal frequency type, W(eek) or M(onth) */}
-            <td>{habit.GoalFqType}</td>
-            {/* habit.records is habit records from HabitRecords table */}
-            <td>{habit.records && habit.records.length} times</td>
-          </tr>
-
-          {/* Render habit.records if it exists */}
-          {habit.records && habit.records.map((record, index) => (
-            <tr key={record.Hid + index}>
-              <td>{index}</td>
-              <td colSpan={3}>{record.LogTime}</td>
+          <thead className='table-info' key={habit.Hid + "-header"}>
+            <tr>
+              <th style={{ width: '64%' }}>Habit</th>
+              <th style={{ width: '12%' }}>Frequency</th>
+              <th style={{ width: '12%' }}>Per</th>
+              <th style={{ width: '12%' }}>Logged</th>
             </tr>
-          ))}
-        </tbody>
-        
-        <tfoot>
-          <tr>
-            <td className='table-primary' colSpan={4}>
-              <table className='table table-hover'>
-                <tbody className='table-secondary'>
-                  <tr>
-                    {weekDates.map((date, index) => (
-                      <td key={index}>{date.format('MMM-DD')}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    {weekDates.map((date, index) => (
-                      <td key={index + "-state"}>
-                        <button className="btn btn-outline-secondary">Zzz</button>
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </td>
-          </tr>
-        </tfoot>
-        
-      </table>
-      ))}
+          </thead>
+
+          <tbody className='table-primary'>
+            <tr>
+              <td>{habit.HDscr}</td>
+              <td>{habit.GoalFq}</td>
+              {/* This is habit goal frequency type, W(eek) or M(onth) */}
+              <td>{habit.GoalFqType}</td>
+              {/* habit.records is habit records from HabitRecords table */}
+              <td>{habit.records && habit.records.length} times</td>
+            </tr>
+
+            {/* Render habit.records if it exists */}
+            {habit.records && habit.records.map((record, index) => (
+              <tr key={record.Hid + index}>
+                <td>{index}</td>
+                <td colSpan={3}>{record.LogTime}</td>
+              </tr>
+            ))}
+          </tbody>
+          
+          <tfoot>
+            <tr>
+              <td className='table-primary' colSpan={4}>
+                <table className='table table-hover'>
+                  <tbody className='table-secondary'>
+                    <tr>
+                      {weekDates.map((date, index) => (
+                        <td key={index}>{date.format('MMM-DD')}</td>
+                      ))}
+                    </tr>
+                    <tr>
+                      {weekDates.map((date, index) => (
+                        <td key={index + "-state"}>
+                          <button className="btn btn-outline-secondary">Zzz</button>
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tfoot>
+          
+        </table>
+        ))
+        ) : (
+          <p>Updating habits...</p>
+        )
+      }
     </div>
   );
 }
