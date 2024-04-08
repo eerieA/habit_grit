@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
-import dayjs from 'dayjs';
 
 import SignInForm from './signIn.js';
+import HabitsTable from './habitsTable.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
 // This is the main component App
 function App() {
-  const [isLoading, setIsLoading] = useState(false);
   const [habits, setHabits] = useState([]);
-  const [isHabitsUpdating, setIsHabitsUpdating] = useState(false);
+  const [habitRecordCnt, setHabitRecordCnt] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [isHabitsUpdFinished, setIsHabitsUpdFinished] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [localUid, setLocalUid] = useState('');
@@ -35,12 +35,14 @@ function App() {
         return;
       }
 
-      // Store habits into the state array
-      setHabits(habits);
+      // Get count of rows by counting in only one column, and store it in state
+      let { data: habitRecordCnt } = await supabase
+          .from("HabitRecords")
+          .select("Hid", {count: 'exact'});
+      setHabitRecordCnt(habitRecordCnt.length);
 
       // Then fetch records for each habit from HabitRecords in supabase
       for (let habit of habits) {
-        setIsHabitsUpdating(false);
         let { data: habitRecords, error: recordError } = await supabase
           .from("HabitRecords")
           .select("*")
@@ -55,7 +57,9 @@ function App() {
         habit.records = habitRecords;
       }
       console.log('Habits with records:', habits);
-      setIsHabitsUpdating(true);
+
+      // Store finalized habits into the state array
+      setHabits(habits);
 
     } catch (error) {
       console.error('Error:', error);
@@ -71,8 +75,19 @@ function App() {
   }, [localUid, localEmail]);
 
   useEffect(() => {
-    setIsHabitsUpdFinished(true);
-  }, [isHabitsUpdating]);
+    // Whenever habits data changes, check if there are enough habit records
+    // If there are, mark the update as finished
+    var cnt = 0;
+    for (let habit of habits) {
+      if (habit.records) {
+        cnt += 1;
+      }
+    }
+
+    if (cnt >= habitRecordCnt) {
+      setIsHabitsUpdFinished(true);
+    }
+  }, [habits, habitRecordCnt]);
 
   useEffect(() => {
     // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
@@ -130,90 +145,6 @@ function App() {
 }
 
 export default App;
-
-
-// Below is child component HabitsTable
-
-function getCurrentWeekDates() {
-  const startOfWeek = dayjs().startOf('week');
-  const weekDates = [];
-  for (let i = 0; i < 7; i++) {
-    const date = startOfWeek.add(i, 'day');
-    weekDates.push(date);
-  }
-  return weekDates;
-}
-
-function HabitsTable({ habits, isHabitsUpdFinished }) {
-  
-  const weekDates = getCurrentWeekDates();
-
-  return (
-    <div>
-      {isHabitsUpdFinished ? (
-      habits.map(habit => (
-        <table className='table table-hover' key={habit.Hid}>
-
-          <thead className='table-info' key={habit.Hid + "-header"}>
-            <tr>
-              <th style={{ width: '64%' }}>Habit</th>
-              <th style={{ width: '12%' }}>Frequency</th>
-              <th style={{ width: '12%' }}>Per</th>
-              <th style={{ width: '12%' }}>Logged</th>
-            </tr>
-          </thead>
-
-          <tbody className='table-primary'>
-            <tr>
-              <td>{habit.HDscr}</td>
-              <td>{habit.GoalFq}</td>
-              {/* This is habit goal frequency type, W(eek) or M(onth) */}
-              <td>{habit.GoalFqType}</td>
-              {/* habit.records is habit records from HabitRecords table */}
-              <td>{habit.records && habit.records.length} times</td>
-            </tr>
-
-            {/* Render habit.records if it exists */}
-            {habit.records && habit.records.map((record, index) => (
-              <tr key={record.Hid + index}>
-                <td>{index}</td>
-                <td colSpan={3}>{record.LogTime}</td>
-              </tr>
-            ))}
-          </tbody>
-          
-          <tfoot>
-            <tr>
-              <td className='table-primary' colSpan={4}>
-                <table className='table table-hover'>
-                  <tbody className='table-secondary'>
-                    <tr>
-                      {weekDates.map((date, index) => (
-                        <td key={index}>{date.format('MMM-DD')}</td>
-                      ))}
-                    </tr>
-                    <tr>
-                      {weekDates.map((date, index) => (
-                        <td key={index + "-state"}>
-                          <button className="btn btn-outline-secondary">Zzz</button>
-                        </td>
-                      ))}
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-          </tfoot>
-          
-        </table>
-        ))
-        ) : (
-          <p>Updating habits...</p>
-        )
-      }
-    </div>
-  );
-}
 
 
 // Below is child component AddHabitForm
