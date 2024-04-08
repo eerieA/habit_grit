@@ -34,11 +34,20 @@ function App() {
         console.error('Error fetching habits from Supabase:', error);
         return;
       }
+      console.log("1st round habits:", habits);
 
-      // Get count of rows by counting in only one column, and store it in state
+      // Get count of rows by getting rows of the joined table where uid is local uid, and store the length in state
       let { data: habitRecordCnt } = await supabase
           .from("HabitRecords")
-          .select("Hid", {count: 'exact'});
+          .select(`
+          Hid,
+          LogTime,
+          Habits (
+            Hid,
+            Uid
+          )`)
+          .eq('Habits.Uid', uid);
+      console.log()
       setHabitRecordCnt(habitRecordCnt.length);
 
       // Then fetch records for each habit from HabitRecords in supabase
@@ -77,10 +86,11 @@ function App() {
   useEffect(() => {
     // Whenever habits data changes, check if there are enough habit records
     // If there are, mark the update as finished
+    console.log("State habitRecordCnt", habitRecordCnt);
     var cnt = 0;
     for (let habit of habits) {
       if (habit.records) {
-        cnt += 1;
+        cnt += habit.records.length;
       }
     }
 

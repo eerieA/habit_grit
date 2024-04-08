@@ -1,3 +1,4 @@
+import supabase from "./supabase.js";
 import dayjs from "dayjs";
 
 function getCurrentWeekDates() {
@@ -12,6 +13,34 @@ function getCurrentWeekDates() {
 
 function HabitsTable({ habits, isHabitsUpdFinished }) {
   const weekDates = getCurrentWeekDates();
+
+  const toggleLogOnDay = async (date, hid) => {
+    console.log("Passed in date:", date);
+    console.log("Passed in hid:", hid);
+    let { data, error } = await supabase
+      .from('HabitRecords')
+      .insert([
+        { Hid: hid, LogTime: date },
+      ])
+      .select();
+
+    if (error) {
+      console.log('Error adding habit to Supabase:', error);
+      if (error.code === '23505') {
+        // This is code for duplicate primary key, i.e. the log exists. So toggle it off. i.e. delete.
+        let { deleteError } = await supabase
+          .from('HabitRecords')
+          .delete()
+          .eq('Hid', hid)
+          .eq('LogTime', date);
+
+        console.log('deleteError:', deleteError);
+      }
+      return;
+    }
+
+    console.log("Response data:", data);
+  }
 
   return (
     <div>
@@ -60,9 +89,7 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
                       <tr>
                         {weekDates.map((date, index) => (
                           <td key={index + "-state"}>
-                            <button className="btn btn-outline-secondary">
-                              Zzz
-                            </button>
+                            <button className="btn btn-outline-secondary" onClick={() => toggleLogOnDay(date, habit.Hid)}>Zzz</button>
                           </td>
                         ))}
                       </tr>
