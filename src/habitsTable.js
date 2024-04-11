@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
 import dayjs from "dayjs";
 
@@ -12,11 +13,26 @@ function getCurrentWeekDates() {
 }
 
 function HabitsTable({ habits, isHabitsUpdFinished }) {
-  const weekDates = getCurrentWeekDates();
+  const [logBtnStates, setLogBtnStates] = useState(Array(7).fill(false));
+  const [logBtnStates2, setLogBtnStates2] = useState({});
 
-  const toggleLogOnDay = async (date, hid) => {
+  const weekDates = getCurrentWeekDates();
+  
+  const toggleLogOnDay = async (index, date, hid) => {
     console.log("Passed in date:", date);
+    console.log("date.unix():", date.unix());
     console.log("Passed in hid:", hid);
+    
+    const newButtonStates = [...logBtnStates];
+    newButtonStates[index] = !newButtonStates[index];
+    setLogBtnStates(newButtonStates);
+    console.log("newButtonStates:", newButtonStates);
+    
+    const newButtonStates2 = { ...logBtnStates2 } || {};
+    newButtonStates2[hid] = newButtonStates2[hid] || Array(7).fill(false);
+    newButtonStates2[hid][index] = !newButtonStates2[hid][index];
+    setLogBtnStates2(newButtonStates2);
+
     let { data, error } = await supabase
       .from('HabitRecords')
       .insert([
@@ -25,7 +41,6 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
       .select();
 
     if (error) {
-      console.log('Error adding habit to Supabase:', error);
       if (error.code === '23505') {
         // This is code for duplicate primary key, i.e. the log exists. So toggle it off. i.e. delete.
         let { deleteError } = await supabase
@@ -34,13 +49,25 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
           .eq('Hid', hid)
           .eq('LogTime', date);
 
-        console.log('deleteError:', deleteError);
+        if (deleteError) {
+          console.log('deleteError:', deleteError);
+        }
+      
+      } else {
+        // For other errors, print error content
+        console.log('Error adding habit to Supabase:', error);
       }
+
       return;
     }
-
+    
     console.log("Response data:", data);
   }
+
+  useEffect(() => {
+    // This effect is triggered on component load
+    console.log("[useEffect] logBtnStates2:", logBtnStates2);
+  }, [logBtnStates2]);
 
   return (
     <div>
@@ -88,8 +115,8 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
                       </tr>
                       <tr>
                         {weekDates.map((date, index) => (
-                          <td key={index + "-state"}>
-                            <button className="btn btn-outline-secondary" onClick={() => toggleLogOnDay(date, habit.Hid)}>Zzz</button>
+                          <td key={index + "-btn"}>
+                            <button className={logBtnStates[index] ? "btn btn-success" : "btn btn-outline-secondary"} onClick={() => toggleLogOnDay(index, date, habit.Hid)}>Zzz</button>
                           </td>
                         ))}
                       </tr>

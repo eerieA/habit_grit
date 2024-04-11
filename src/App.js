@@ -34,7 +34,6 @@ function App() {
         console.error('Error fetching habits from Supabase:', error);
         return;
       }
-      console.log("1st round habits:", habits);
 
       // Get count of rows by getting rows of the joined table where uid is local uid, and store the length in state
       let { data: habitRecordCnt } = await supabase
@@ -78,15 +77,8 @@ function App() {
   }
 
   useEffect(() => {
-    // This effect will be triggered whenever localUid and localEmail changes
-    console.log("[App.js] Local uid is", localUid);
-    console.log("[App.js] Local email is", localEmail);
-  }, [localUid, localEmail]);
-
-  useEffect(() => {
     // Whenever habits data changes, check if there are enough habit records
     // If there are, mark the update as finished
-    console.log("State habitRecordCnt", habitRecordCnt);
     var cnt = 0;
     for (let habit of habits) {
       if (habit.records) {
