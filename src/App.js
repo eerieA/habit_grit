@@ -46,7 +46,6 @@ function App() {
             Uid
           )`)
           .eq('Habits.Uid', uid);
-      console.log()
       setHabitRecordCnt(habitRecordCnt.length);
 
       // Then fetch records for each habit from HabitRecords in supabase
@@ -90,6 +89,13 @@ function App() {
       setIsHabitsUpdFinished(true);
     }
   }, [habits, habitRecordCnt]);
+
+  useEffect(() => {
+    if (isHabitsUpdFinished) {
+      console.log("isHabitsUpdFinished is true now.");
+      console.log("habits after:", habits);
+    }    
+  }, [isHabitsUpdFinished, habits]);
 
   useEffect(() => {
     // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
@@ -138,7 +144,7 @@ function App() {
           {isLoading ? (
             <Loader />
           ) : (            
-            <HabitsTable habits={habits} isHabitsUpdFinished={isHabitsUpdFinished} />
+            <HabitsTable habits={habits} localUid={localUid} isHabitsUpdFinished={isHabitsUpdFinished} refetchHabits={refetchHabits} />
           )}
         </div>
       </div>

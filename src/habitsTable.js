@@ -12,7 +12,7 @@ function getCurrentWeekDates() {
   return weekDates;
 }
 
-function HabitsTable({ habits, isHabitsUpdFinished }) {
+function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   const [logBtnStates, setLogBtnStates] = useState(Array(7).fill(false));
   const [logBtnStates2, setLogBtnStates2] = useState({});
 
@@ -28,6 +28,7 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
     setLogBtnStates(newButtonStates);
     console.log("newButtonStates:", newButtonStates);
     
+    // Copy current logBtnStates2 state, and initilize as empty dictionary if logBtnStates2 is empty
     const newButtonStates2 = { ...logBtnStates2 } || {};
     newButtonStates2[hid] = newButtonStates2[hid] || Array(7).fill(false);
     newButtonStates2[hid][index] = !newButtonStates2[hid][index];
@@ -52,6 +53,9 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
         if (deleteError) {
           console.log('deleteError:', deleteError);
         }
+
+        // This means delete was successful. Refetch.
+        refetchHabits(localUid || 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
       
       } else {
         // For other errors, print error content
@@ -62,12 +66,18 @@ function HabitsTable({ habits, isHabitsUpdFinished }) {
     }
     
     console.log("Response data:", data);
+    // This means insert was successful. Refetch.
+    refetchHabits(localUid || 'd1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
   }
 
   useEffect(() => {
-    // This effect is triggered on component load
     console.log("[useEffect] logBtnStates2:", logBtnStates2);
   }, [logBtnStates2]);
+
+  useEffect(() => {
+    // This effect is triggered on component load
+    console.log("Now habits table is refreshed");
+  }, []);
 
   return (
     <div>
