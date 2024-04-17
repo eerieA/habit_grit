@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import supabase from "./supabase.js";
 import dayjs from "dayjs";
 
+var utc = require('dayjs/plugin/utc');
+var timezone = require('dayjs/plugin/timezone'); // dependent on utc plugin
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 function getCurrentWeekDates() {
   const startOfWeek = dayjs().startOf("week");
   const weekDates = [];
@@ -73,6 +78,34 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   useEffect(() => {
     console.log("[useEffect] logBtnStates2:", logBtnStates2);
   }, [logBtnStates2]);
+
+  useEffect(() => {
+    // This effect is triggered on component load
+    console.log("refreshed habits:", habits);
+    const tmpLogBtnStates = habits.map(habit => {
+      const records = habit.records;
+      const paddedRecords = [];
+      for (let i = 0; i < 7; i++) {
+        console.log("i", i);
+        console.log("weekDates[i]", weekDates[i]);
+        if (records[i]) {
+          // Convert string into a Dayjs object. Note that the $d property will contain local timezone,
+          // but in fact the timezone is as specified, because the child object $x records it correctly.
+          const logTimeUTC = dayjs(records[i]['LogTime']).tz("GMT");
+          
+          console.log("records[i]['LogTime']", records[i]['LogTime']);
+          console.log("logTimeUTC", logTimeUTC);
+        }
+        if (records[i]) {
+          paddedRecords.push(true);
+        } else {
+          paddedRecords.push(false);
+        }
+      }
+      return paddedRecords;
+    });
+    console.log("tmpLogBtnStates:", tmpLogBtnStates);
+  }, [habits, weekDates]);
 
   useEffect(() => {
     // This effect is triggered on component load
