@@ -85,23 +85,54 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
     const tmpLogBtnStates = habits.map(habit => {
       const records = habit.records;
       const paddedRecords = [];
-      for (let i = 0; i < 7; i++) {
-        console.log("i", i);
-        console.log("weekDates[i]", weekDates[i]);
-        if (records[i]) {
-          // Convert string into a Dayjs object. Note that the $d property will contain local timezone,
-          // but in fact the timezone is as specified, because the child object $x records it correctly.
-          const logTimeUTC = dayjs(records[i]['LogTime']).tz("GMT");
-          
-          console.log("records[i]['LogTime']", records[i]['LogTime']);
-          console.log("logTimeUTC", logTimeUTC);
+      let startRecordIndex = -1;
+
+      // Loop through records to try to find a record that is nearest and after the start of current week
+      for (let i = 0; i < records.length; i++) {
+        let logTimeUTC = dayjs(records[i]['LogTime']).tz("GMT");
+        if (logTimeUTC.isAfter(weekDates[0], "date") || logTimeUTC.isSame(weekDates[0], "date")) {
+          // Because habit records were fetched with ascending order by LogTime, getting the start index should suffice
+          startRecordIndex = i;
+          break;
         }
-        if (records[i]) {
-          paddedRecords.push(true);
-        } else {
+      }
+      console.log("startRecordIndex", startRecordIndex);
+
+      // If found a start in dex, Loop through days of the week to try to find a record for a day
+      if (startRecordIndex >= 0) {
+        let currRecordIndex = startRecordIndex;
+        for (let i = 0; i < 7; i++) {
+          let isFoundLogOnCurrDay = false;
+          if (currRecordIndex >= records.length) {
+            break;
+          }
+          
+          for (let j = currRecordIndex; j < records.length; j++) {
+            let logTimeUTC = dayjs(records[j]['LogTime']).tz("GMT");
+            if (logTimeUTC.isSame(weekDates[i], "date")) {
+              isFoundLogOnCurrDay = true;
+              currRecordIndex ++;
+            } else {;
+            }
+          }
+
+          if (isFoundLogOnCurrDay) {
+            console.log("a record is found on this day", i);
+            paddedRecords.push(true);
+          } else {
+            console.log("no record found on this day", i);
+            paddedRecords.push(false);
+          }
+        }
+      }
+      
+      // Finally pad the array up to 7
+      if (paddedRecords.length < 7 || !paddedRecords) {
+        while (paddedRecords.length < 7) {
           paddedRecords.push(false);
         }
       }
+
       return paddedRecords;
     });
     console.log("tmpLogBtnStates:", tmpLogBtnStates);

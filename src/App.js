@@ -53,7 +53,8 @@ function App() {
         let { data: habitRecords, error: recordError } = await supabase
           .from("HabitRecords")
           .select("*")
-          .eq('Hid', habit.Hid); // Reminder: habit id is stored in 'Hid' column, and col name is case sensitive
+          .eq('Hid', habit.Hid) // Reminder: habit id is stored in 'Hid' column, and col name is case sensitive
+          .order('LogTime', {ascending: true});
 
         if (recordError) {
           console.error('Error fetching habit records from Supabase:', recordError);
