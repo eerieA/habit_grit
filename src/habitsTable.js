@@ -23,6 +23,65 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
 
   const weekDates = getCurrentWeekDates();
   
+  const mapBtnStates = (habits, weekDates) => {
+    let tmpLogBtnStates = {};
+
+    tmpLogBtnStates = habits.map(habit => {
+      let records = habit.records;
+      let paddedRecords = [];
+      let startRecordIndex = -1;
+
+      // Loop through records to try to find a record that is nearest and after the start of current week
+      for (let i = 0; i < records.length; i++) {
+        let logTimeUTC = dayjs(records[i]['LogTime']).tz("GMT");
+        if (logTimeUTC.isAfter(weekDates[0], "date") || logTimeUTC.isSame(weekDates[0], "date")) {
+          // Because habit records were fetched with ascending order by LogTime, getting the start index should suffice
+          startRecordIndex = i;
+          break;
+        }
+      }
+
+      // If found a start in dex, Loop through days of the week to try to find a record for a day
+      if (startRecordIndex >= 0) {
+        let currRecordIndex = startRecordIndex;
+        for (let i = 0; i < 7; i++) {
+          let isFoundLogOnCurrDay = false;
+          if (currRecordIndex >= records.length) {
+            break;
+          }
+
+          for (let j = currRecordIndex; j < records.length; j++) {
+            let logTimeUTC = dayjs(records[j]['LogTime']).tz("GMT");
+            if (logTimeUTC.isSame(weekDates[i], "date")) {
+              isFoundLogOnCurrDay = true;
+              currRecordIndex++;
+            } else {
+              ;
+            }
+          }
+
+          if (isFoundLogOnCurrDay) {
+            // a record is found on this day, push true
+            paddedRecords.push(true);
+          } else {
+            // a record is not found on this day, push false
+            paddedRecords.push(false);
+          }
+        }
+      }
+
+      // Finally pad the array up to 7, either there are not enough records before end of week, or no records in this week
+      if (paddedRecords.length < 7) {
+        while (paddedRecords.length < 7) {
+          paddedRecords.push(false);
+        }
+      }
+
+      return paddedRecords;
+    });
+    return tmpLogBtnStates;
+  }
+
   const toggleLogOnDay = async (index, date, hid) => {
     console.log("Passed in date:", date);
     console.log("date.unix():", date.unix());
@@ -33,12 +92,6 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
     setLogBtnStates(newButtonStates);
     console.log("newButtonStates:", newButtonStates);
     
-    // Copy current logBtnStates2 state, and initilize as empty dictionary if logBtnStates2 is empty
-    const newButtonStates2 = { ...logBtnStates2 } || {};
-    newButtonStates2[hid] = newButtonStates2[hid] || Array(7).fill(false);
-    newButtonStates2[hid][index] = !newButtonStates2[hid][index];
-    setLogBtnStates2(newButtonStates2);
-
     let { data, error } = await supabase
       .from('HabitRecords')
       .insert([
@@ -80,67 +133,20 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   }, [logBtnStates2]);
 
   useEffect(() => {
-    // This effect is triggered on component load
-    console.log("refreshed habits:", habits);
-    const tmpLogBtnStates = habits.map(habit => {
-      const records = habit.records;
-      const paddedRecords = [];
-      let startRecordIndex = -1;
+    // This effect is triggered whenever habits change
 
-      // Loop through records to try to find a record that is nearest and after the start of current week
-      for (let i = 0; i < records.length; i++) {
-        let logTimeUTC = dayjs(records[i]['LogTime']).tz("GMT");
-        if (logTimeUTC.isAfter(weekDates[0], "date") || logTimeUTC.isSame(weekDates[0], "date")) {
-          // Because habit records were fetched with ascending order by LogTime, getting the start index should suffice
-          startRecordIndex = i;
-          break;
-        }
-      }
-      console.log("startRecordIndex", startRecordIndex);
-
-      // If found a start in dex, Loop through days of the week to try to find a record for a day
-      if (startRecordIndex >= 0) {
-        let currRecordIndex = startRecordIndex;
-        for (let i = 0; i < 7; i++) {
-          let isFoundLogOnCurrDay = false;
-          if (currRecordIndex >= records.length) {
-            break;
-          }
-          
-          for (let j = currRecordIndex; j < records.length; j++) {
-            let logTimeUTC = dayjs(records[j]['LogTime']).tz("GMT");
-            if (logTimeUTC.isSame(weekDates[i], "date")) {
-              isFoundLogOnCurrDay = true;
-              currRecordIndex ++;
-            } else {;
-            }
-          }
-
-          if (isFoundLogOnCurrDay) {
-            console.log("a record is found on this day", i);
-            paddedRecords.push(true);
-          } else {
-            console.log("no record found on this day", i);
-            paddedRecords.push(false);
-          }
-        }
-      }
-      
-      // Finally pad the array up to 7
-      if (paddedRecords.length < 7 || !paddedRecords) {
-        while (paddedRecords.length < 7) {
-          paddedRecords.push(false);
-        }
-      }
-
-      return paddedRecords;
-    });
-    console.log("tmpLogBtnStates:", tmpLogBtnStates);
-  }, [habits, weekDates]);
+    // Update button states on habits refresh too
+    let tmpLogBtnStates = mapBtnStates(habits, weekDates);
+    setLogBtnStates2(tmpLogBtnStates);
+  }, [habits]);
 
   useEffect(() => {
     // This effect is triggered on component load
-    console.log("Now habits table is refreshed");
+    console.log("Now habits table has refreshed.");
+
+    // Update button states on load
+    let tmpLogBtnStates = mapBtnStates(habits, weekDates);
+    setLogBtnStates2(tmpLogBtnStates);
   }, []);
 
   return (
