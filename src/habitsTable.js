@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import supabase from "./supabase.js";
 import dayjs from "dayjs";
 
+import { testUid } from './constants.js';
+
 var utc = require("dayjs/plugin/utc");
 var timezone = require("dayjs/plugin/timezone"); // dependent on utc plugin
 dayjs.extend(utc);
@@ -46,7 +48,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
         }
 
         // This means delete was successful. Refetch.
-        refetchHabits(localUid || "d1a3fba1-0fc9-45b5-bdd8-934a1b05f516");
+        refetchHabits(localUid || testUid);
       } else {
         // For other errors, print error content
         console.log("Error adding habit to Supabase:", error);
@@ -57,7 +59,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
 
     console.log("Response data:", data);
     // This means insert was successful. Refetch.
-    refetchHabits(localUid || "d1a3fba1-0fc9-45b5-bdd8-934a1b05f516");
+    refetchHabits(localUid || testUid);
   };
 
   useEffect(() => {

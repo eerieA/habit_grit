@@ -3,6 +3,7 @@ import supabase from "./supabase.js";
 
 import SignInForm from './signIn.js';
 import HabitsTable from './habitsTable.js';
+import { testUid } from './constants.js';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
@@ -108,7 +109,7 @@ function App() {
       fetchData();
     } else {
       const fetchData = async () => {
-        await refetchHabits('d1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
+        await refetchHabits(testUid);
       };
       fetchData();
     }
@@ -117,11 +118,11 @@ function App() {
   useEffect(() => {
     // This effect is triggered on page load
     const fetchData = async () => {
-      await refetchHabits('d1a3fba1-0fc9-45b5-bdd8-934a1b05f516');
+      await refetchHabits(testUid);
     };
     fetchData();
-    // This state has to be reset to false here, not inside refetchHabits(.)
-    setIsHabitsUpdFinished(false);
+    // This state has to be reset to true here, not inside refetchHabits(.)
+    setIsHabitsUpdFinished(true);
   }, []);
 
   
