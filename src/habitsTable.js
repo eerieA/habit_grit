@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import supabase from "./supabase.js";
 import dayjs from "dayjs";
 
-import { testUid } from './constants.js';
+import { testUid, errorDupPrimaryKey } from './constants.js';
 
 var utc = require("dayjs/plugin/utc");
 var timezone = require("dayjs/plugin/timezone"); // dependent on utc plugin
@@ -24,6 +24,13 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
 
   const weekDates = getCurrentWeekDates();
 
+  // Function to convert UTC time to local time and format it
+  const convertToLocalDate = (utcTimeString) => {
+    const utcDateTime = new Date(utcTimeString);
+    const localDate = utcDateTime.toLocaleDateString();
+    return localDate;
+  };
+  
   const toggleLogOnDay = async (index, date, hid) => {
     console.log("Passed in date:", date);
     console.log("date.unix():", date.unix());
@@ -35,7 +42,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
       .select();
 
     if (error) {
-      if (error.code === "23505") {
+      if (error.code === errorDupPrimaryKey) {
         // This is code for duplicate primary key, i.e. the log exists. So toggle it off. i.e. delete.
         let { deleteError } = await supabase
           .from("HabitRecords")
@@ -44,14 +51,14 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
           .eq("LogTime", date);
 
         if (deleteError) {
-          console.log("deleteError:", deleteError);
+          console.log("Error deleting habit record from Supabase:", deleteError);
         }
 
         // This means delete was successful. Refetch.
         refetchHabits(localUid || testUid);
       } else {
         // For other errors, print error content
-        console.log("Error adding habit to Supabase:", error);
+        console.log("Error adding habit record to Supabase:", error);
       }
 
       return;
@@ -163,20 +170,29 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
               </tr>
 
               {/* Render habit.records if it exists */}
-              {habit.records &&
-                habit.records.map((record, index) => (
-                  <tr key={record.Hid + index}>
-                    <td>{index}</td>
-                    <td colSpan={3}>{record.LogTime}</td>
-                  </tr>
-                ))}
+              <tr>
+                <td colSpan={4}>
+                  <table className="table table-hover">
+                    <tbody className="table-info">
+                      <tr><td colSpan={4}>Log history <button className={"btn btn-outline-secondary"}>-</button>
+                      </td></tr>
+                      {habit.records && habit.records.map((record, index) => (
+                        <tr key={record.Hid + index}>
+                          <td>{index}</td>
+                          <td>{convertToLocalDate(record.LogTime)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
             </tbody>
 
             <tfoot>
               <tr>
                 <td className="table-primary" colSpan={4}>
                   <table className="table table-hover">
-                    <tbody className="table-secondary">
+                    <tbody className="table-success">
                       <tr>
                         {weekDates.map((date, index) => (
                           <td key={index}>{date.format("MMM-DD")}</td>
@@ -205,6 +221,9 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
                     </tbody>
                   </table>
                 </td>
+              </tr>
+              <tr>
+                <td className="table-primary" align="right" colSpan={4}><button className={"btn btn-dark"}>Delete Habit</button></td>
               </tr>
             </tfoot>
           </table>
