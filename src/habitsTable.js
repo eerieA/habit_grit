@@ -69,6 +69,21 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
     refetchHabits(localUid || testUid);
   };
 
+  const handleDeleteHabit = async (hid) => {
+    console.log("Passed in hid is:", hid);
+
+    let { error } = await supabase.from("Habits").delete().eq("Hid", hid);
+
+    if (error) {      
+      console.log("Error deleting habit from Supabase:", error);
+      return;
+    }
+
+    console.log("Deletion of habit was successful.");
+    // This means delete was successful. Refetch.
+    refetchHabits(localUid || testUid);
+  };
+
   useEffect(() => {
     console.log("[useEffect] logBtnStates:", logBtnStates);
   }, [logBtnStates]);
@@ -174,7 +189,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
                 <td colSpan={4}>
                   <table className="table table-hover">
                     <tbody className="table-info">
-                      <tr><td colSpan={4}>Log history <button className={"btn btn-outline-secondary"}>-</button>
+                      <tr><td colSpan={4}>Log history <button className={"btn btn-success"}>-</button>
                       </td></tr>
                       {habit.records && habit.records.map((record, index) => (
                         <tr key={record.Hid + index}>
@@ -223,7 +238,9 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
                 </td>
               </tr>
               <tr>
-                <td className="table-primary" align="right" colSpan={4}><button className={"btn btn-dark"}>Delete Habit</button></td>
+                <td className="table-primary" align="right" colSpan={4}>
+                  <button className={"btn btn-dark"} onClick={() => handleDeleteHabit(habit.Hid)}>Delete Habit</button>
+                </td>
               </tr>
             </tfoot>
           </table>
