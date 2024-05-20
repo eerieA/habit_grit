@@ -23,13 +23,6 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   const [logBtnStates, setLogBtnStates] = useState({});
 
   const weekDates = getCurrentWeekDates();
-
-  // Function to convert UTC time to local time and format it
-  const convertToLocalDate = (utcTimeString) => {
-    const utcDateTime = new Date(utcTimeString);
-    const localDate = utcDateTime.toLocaleDateString();
-    return localDate;
-  };
   
   const toggleLogOnDay = async (index, date, hid) => {
     console.log("Passed in date:", date);
@@ -187,18 +180,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
               {/* Render habit.records if it exists */}
               <tr>
                 <td colSpan={4}>
-                  <table className="table table-hover">
-                    <tbody className="table-info">
-                      <tr><td colSpan={4}>Log history <button className={"btn btn-success"}>-</button>
-                      </td></tr>
-                      {habit.records && habit.records.map((record, index) => (
-                        <tr key={record.Hid + index}>
-                          <td>{index}</td>
-                          <td>{convertToLocalDate(record.LogTime)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <LogHistory habit= {habit} />
                 </td>
               </tr>
             </tbody>
@@ -253,3 +235,39 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
 }
 
 export default HabitsTable;
+
+
+// Child component: log history table
+
+function LogHistory({ habit }) {
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  
+  // Function to convert UTC time to local time and format it
+  const convertToLocalDate = (utcTimeString) => {
+    const utcDateTime = new Date(utcTimeString);
+    const localDate = utcDateTime.toLocaleDateString();
+    return localDate;
+  };
+
+  // Function to toggle the visibility state
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
+  };
+
+  return (    
+    <table className="table table-hover">
+    <tbody className="table-info">
+      <tr><td colSpan={4}>Log history <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
+        {isCollapsed ? '+' : '-'}
+      </button>
+      </td></tr>
+      {!isCollapsed && habit.records && habit.records.map((record, index) => (
+        <tr key={record.Hid + index}>
+          <td>{index}</td>
+          <td>{convertToLocalDate(record.LogTime)}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  );
+}
