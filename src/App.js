@@ -15,6 +15,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [isHabitsUpdFinished, setIsHabitsUpdFinished] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [localUid, setLocalUid] = useState('');
   const [localEmail, setLocalEmail] = useState('');
 
@@ -55,6 +56,7 @@ function App() {
           .from("HabitRecords")
           .select("*")
           .eq('Hid', habit.Hid) // Reminder: habit id is stored in 'Hid' column, and col name is case sensitive
+          .limit(50)
           .order('LogTime', {ascending: true});
 
         if (recordError) {
@@ -75,6 +77,9 @@ function App() {
     }
 
     setIsLoading(false);
+
+    // Also set isSigningIn to false, because this might be called by a sign in action
+    setIsSigningIn(false);
   }
 
   useEffect(() => {
@@ -102,6 +107,8 @@ function App() {
   useEffect(() => {
     // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
     // it will retrieve some placeholders (example data)
+    setIsSigningIn(true);
+
     if (localUid !== '') {
       const fetchData = async () => {
         await refetchHabits(localUid);
@@ -143,7 +150,7 @@ function App() {
         </div>
 
         <div className='main-container'>
-          {isLoading ? (
+          {isLoading || isSigningIn ? (
             <Loader />
           ) : (            
             <HabitsTable habits={habits} localUid={localUid} isHabitsUpdFinished={isHabitsUpdFinished} refetchHabits={refetchHabits} />

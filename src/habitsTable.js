@@ -245,7 +245,11 @@ function LogHistory({ habit }) {
   // Function to convert UTC time to local time and format it
   const convertToLocalDate = (utcTimeString) => {
     const utcDateTime = new Date(utcTimeString);
-    const localDate = utcDateTime.toLocaleDateString();
+
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const localDate = formatter.format(utcDateTime);
+
     return localDate;
   };
 
@@ -257,7 +261,7 @@ function LogHistory({ habit }) {
   return (    
     <table className="table table-hover">
     <tbody className="table-info">
-      <tr><td colSpan={4}>Log history <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
+      <tr><td colSpan={4}>Log history (up to 50) <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
         {isCollapsed ? '+' : '-'}
       </button>
       </td></tr>
