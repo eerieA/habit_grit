@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import supabase from "./supabase.js";
 import dayjs from "dayjs";
+import Plot from 'react-plotly.js';
 
 import { testUid, errorDupPrimaryKey } from './constants.js';
 
@@ -261,10 +262,21 @@ function LogHistory({ habit }) {
   return (    
     <table className="table table-hover">
     <tbody className="table-info">
-      <tr><td colSpan={4}>Log history (up to 50) <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
+      <tr>
+        <td colSpan={4}>Log history (up to 50) <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
         {isCollapsed ? '+' : '-'}
-      </button>
-      </td></tr>
+        </button>
+        </td>
+      </tr>
+      {!isCollapsed ? (        
+        <tr>
+          <td colSpan={4}>
+            <div className="chart-container">
+            <ChartHabitLog/>
+            </div>
+          </td>
+        </tr>
+        ) : (<></>)}
       {!isCollapsed && habit.records && habit.records.map((record, index) => (
         <tr key={record.Hid + index}>
           <td>{index}</td>
@@ -273,5 +285,28 @@ function LogHistory({ habit }) {
       ))}
     </tbody>
   </table>
+  );
+}
+
+// Child component: log history chart
+
+function ChartHabitLog() {
+  // TODO: make this chart have real data
+  return (
+    <Plot
+      data={[{ type: "bar", x: [1, 2, 3, 4, 5], y: [2, 5, 3, 1, 8] }]}
+      layout={{
+        title: "A Fancy Plot",
+        margin: {
+          l: 2,
+          r: 2,
+          b: 2,
+          t: 15,
+          pad: 0,
+        },
+      }}
+      useResizeHandler={true}
+      style={{ width: "100%", height: "100%" }}
+    />
   );
 }

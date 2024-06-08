@@ -111,6 +111,11 @@ body {
   border-color: var(--bs-table-border-color);
 }
 
+.chart-container {
+  width: 100%;
+  height: 120px; /* You can adjust this height */
+}
+
 .btn-stretch{  
   width: 100%; /* Set width to 100% */
   flex-grow: 1;
