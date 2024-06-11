@@ -14,10 +14,28 @@ function getCurrentWeekDates() {
   const startOfWeek = dayjs().startOf("week");
   const weekDates = [];
   for (let i = 0; i < 7; i++) {
-    const date = startOfWeek.add(i, "day");
+    let date = startOfWeek.add(i, "day");
     weekDates.push(date);
   }
   return weekDates;
+}
+
+function getLastNDays(n) {
+  let dates = [];
+
+  // Get the start of today and convert to UTC with Dayjs, just to keep time format consistent
+  // if need to set to 00:00, use dayjs().utc().startOf('day').tz("Etc/UTC")
+  let currentDate = dayjs().utc().tz("Etc/UTC");
+
+  // Loop to create the Dayjs objects for the last n days
+  for (let i = 0; i < n; i++) {
+      // Create a new Dayjs object representing n - i days before the current date
+      // n - i because we want them to be arranged in ascending order
+      let pastDate = currentDate.subtract(n - i, 'day');      
+      dates.push(pastDate);
+  }
+
+  return dates;
 }
 
 function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
@@ -242,6 +260,23 @@ export default HabitsTable;
 
 function LogHistory({ habit }) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+
+  const pastDates = getLastNDays(50);
+
+  // Map them into date strings for y axis data
+  const pastDateStrings = pastDates.map(date => date.format('YYYY-MM-DD'));
+
+  // Map them into bools for x axis data
+  const recordDates = habit.records.map(record => dayjs.utc(record.LogTime).startOf('day').tz("Etc/UTC"));
+  const recordOnDate = pastDates.map(pastDate =>
+    recordDates.some(recordDate => recordDate.isSame(pastDate, 'day'))
+  );
+  
+  // Package x and y axis data into one object for passing along
+  let LogData = {
+    x: pastDateStrings,
+    y: recordOnDate
+  }
   
   // Function to convert UTC time to local time and format it
   const convertToLocalDate = (utcTimeString) => {
@@ -272,7 +307,7 @@ function LogHistory({ habit }) {
         <tr>
           <td colSpan={4}>
             <div className="chart-container">
-            <ChartHabitLog/>
+            <ChartHabitLog logData= {LogData}/>
             </div>
           </td>
         </tr>
@@ -290,20 +325,52 @@ function LogHistory({ habit }) {
 
 // Child component: log history chart
 
-function ChartHabitLog() {
-  // TODO: make this chart have real data
+function ChartHabitLog({ logData }) {
+  const numericY = logData.y.map(value => value ? 1 : 0);
+  const textY = logData.y.map(value => value ? "Done" : "zzz");
+
   return (
     <Plot
-      data={[{ type: "bar", x: [1, 2, 3, 4, 5], y: [2, 5, 3, 1, 8] }]}
+      data={[
+        {
+        type: "bar",
+        x: logData.x, y: numericY,
+        text: textY.map(String),
+        textfont: {
+          color: '#444',
+        },
+        marker: {
+          color: '#31C6D4',
+        }
+        }
+      ]}
       layout={{
-        title: "A Fancy Plot",
+        //title: "History",
         margin: {
           l: 2,
           r: 2,
-          b: 2,
-          t: 15,
+          b: 24,
+          t: 2,
           pad: 0,
         },
+        xaxis: {
+          type: 'date', // Treat x-axis values as date
+          tickformat: '%m-%d', // Date format for x-axis labels
+          nticks: 8, // Specify the desired number of ticks on the x-axis
+          tickfont: {
+            size: 12
+          },
+          gridcolor: 'rgba(0, 0, 0, 0)', // Set the color of the gridlines to transparent
+        },
+        yaxis: {
+          type: 'linear',
+          tickformat: 'd', // Integer format for y-axis labels; not usful because it can be zoomed?
+          range: [0, 1], // Set the range of y-axis
+          gridcolor: 'rgba(0, 0, 0, 0)', // Set the color of the gridlines
+          zerolinecolor: 'rgba(0.5, 0.5, 0.5, 0.33)', // Set the color of the y axis zero line
+        },
+        plot_bgcolor: 'rgba(0,0,0,0)', // Set plot background to transparent
+        paper_bgcolor: 'rgba(0,0,0,0)' // Set paper background to transparent
       }}
       useResizeHandler={true}
       style={{ width: "100%", height: "100%" }}
