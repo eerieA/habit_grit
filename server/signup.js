@@ -1,3 +1,4 @@
+// This is a backup / test version of sign up function. The deployed version is on Google Cloud Function.
 const { createClient } = require('@supabase/supabase-js');
 const dotenv = require('dotenv');
 
@@ -43,7 +44,6 @@ exports.signup = async (req, res) => {
                 // For some reason if use `const {data, error} = ...` they will be undefined, so have to store them this way
                 const data = response.data;
                 const signInError = response.error;
-                //console.log('response:\n', response);
 
                 if (signInError) {
                     if (signInError.message === "Invalid login credentials") {
@@ -66,10 +66,12 @@ exports.signup = async (req, res) => {
         }
 
         console.log('User signed up successfully:', data);
-        console.log('data.user:', data.user);
         return res.status(200).send({ uid: data.user.id });
     } catch (error) {
+        // In case of error, print error info in terminal
         console.error('Error:', error);
+
+        // And send error message to the client side
         return res.status(500).send({ error: 'Internal server error' });
     }
 };

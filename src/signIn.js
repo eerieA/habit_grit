@@ -9,12 +9,6 @@ function SignInForm({ onUserInfoFetched, setPrtIsSigningIn }) {
   const [localUid, setLocalUid] = useState('');
   const [localEmail, setLocalEmail] = useState('');
 
-  useEffect(() => {
-    // This effect will be triggered whenever uid changes
-    console.log("[signin.js] Local uid is", localUid);
-    console.log("[signin.js] Local email is", localEmail);
-  }, [localUid, localEmail]);
-
   const handleSignIn = async (uid, email) => {
     // Set local variables
     setLocalUid(uid);

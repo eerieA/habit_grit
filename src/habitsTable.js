@@ -44,9 +44,6 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   const weekDates = getCurrentWeekDates();
   
   const toggleLogOnDay = async (index, date, hid) => {
-    console.log("Passed in date:", date);
-    console.log("date.unix():", date.unix());
-    console.log("Passed in hid:", hid);
 
     let { data, error } = await supabase
       .from("HabitRecords")
@@ -76,13 +73,11 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
       return;
     }
 
-    console.log("Response data:", data);
     // This means insert was successful. Refetch.
     refetchHabits(localUid || testUid);
   };
 
   const handleDeleteHabit = async (hid) => {
-    console.log("Passed in hid is:", hid);
 
     let { error } = await supabase.from("Habits").delete().eq("Hid", hid);
 
@@ -95,10 +90,6 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
     // This means delete was successful. Refetch.
     refetchHabits(localUid || testUid);
   };
-
-  useEffect(() => {
-    console.log("[useEffect] logBtnStates:", logBtnStates);
-  }, [logBtnStates]);
 
   useEffect(() => {
     // This effect is triggered whenever habits change
@@ -169,7 +160,7 @@ function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
 
   useEffect(() => {
     // This effect is triggered on component load
-    console.log("Now habits table has refreshed.");
+    console.log("Habits table is loaded.");
   }, []);
 
   return (
