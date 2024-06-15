@@ -77,9 +77,6 @@ function App() {
     }
 
     setIsLoading(false);
-
-    // Also set isSigningIn to false, because this might be called by a sign in action
-    setIsSigningIn(false);
   }
 
   useEffect(() => {
@@ -107,13 +104,15 @@ function App() {
   useEffect(() => {
     // This effect is ideally triggered on successful user signup/login, but if no meaningful uid,
     // it will retrieve some placeholders (example data)
-    setIsSigningIn(true);
-
     if (localUid !== '') {
       const fetchData = async () => {
         await refetchHabits(localUid);
       };
       fetchData();
+
+      // Since localUid not empty string means there was signining in before, here we reset it to false
+      // AFTER refecthing. If earlier, there will be a glitch showing the sample user data.
+      setIsSigningIn(false);
     } else {
       const fetchData = async () => {
         await refetchHabits(testUid);
@@ -138,7 +137,7 @@ function App() {
       <Header />
       <div className='main'>
         <div className='top-container'>
-          <SignInForm onUserInfoFetched={handleUserInfoChange} />
+          <SignInForm onUserInfoFetched={handleUserInfoChange} setPrtIsSigningIn={setIsSigningIn} />
         </div>
 
         <div className='main-container'>
@@ -150,9 +149,9 @@ function App() {
         </div>
 
         <div className='main-container'>
-          {isLoading || isSigningIn ? (
+          {(isLoading || isSigningIn) ? (
             <Loader />
-          ) : (            
+          ) : (
             <HabitsTable habits={habits} localUid={localUid} isHabitsUpdFinished={isHabitsUpdFinished} refetchHabits={refetchHabits} />
           )}
         </div>

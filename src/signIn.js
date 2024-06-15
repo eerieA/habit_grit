@@ -3,9 +3,8 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios';
 
 // Function that constructs the sign in/up form
-function SignInForm({ onUserInfoFetched }) {
+function SignInForm({ onUserInfoFetched, setPrtIsSigningIn }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [password, setPassword] = useState('');
   const [localUid, setLocalUid] = useState('');
   const [localEmail, setLocalEmail] = useState('');
@@ -18,17 +17,17 @@ function SignInForm({ onUserInfoFetched }) {
 
   const handleSignIn = async (uid, email) => {
     // Set local variables
-    setIsSignedIn(true);
     setLocalUid(uid);
     setLocalEmail(email);
 
     // Use the function pointer to call the function in App.js
-    onUserInfoFetched(uid, email)
+    onUserInfoFetched(uid, email);
   };
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       setIsLoading(true);
+      setPrtIsSigningIn(true);
 
       const tmpToken = tokenResponse.access_token
       const userInfo = await axios.get(

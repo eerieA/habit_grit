@@ -298,7 +298,7 @@ function LogHistory({ habit }) {
     <table className="table table-hover">
     <tbody className="table-info">
       <tr>
-        <td colSpan={4}>Log history (up to 50) <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
+        <td colSpan={4}>Log history (50 days prior) <button className={"btn btn-group-lg"} onClick={toggleCollapse}>
         {isCollapsed ? '+' : '-'}
         </button>
         </td>
@@ -312,12 +312,14 @@ function LogHistory({ habit }) {
           </td>
         </tr>
         ) : (<></>)}
+      {/* Not displaying log as list, bcz it might get too long
       {!isCollapsed && habit.records && habit.records.map((record, index) => (
         <tr key={record.Hid + index}>
           <td>{index}</td>
           <td>{convertToLocalDate(record.LogTime)}</td>
         </tr>
       ))}
+      */}
     </tbody>
   </table>
   );
