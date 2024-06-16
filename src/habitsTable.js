@@ -38,6 +38,32 @@ function getLastNDays(n) {
   return dates;
 }
 
+/**
+ * Converts a UTC time string to a local date string with an optional year.
+ * 
+ * @param {string} utcTimeString - The UTC time string to convert.
+ * @param {boolean} keepYear - Whether to include the year in the output.
+ * @returns {string} - The formatted local date string.
+ */
+function convertToLocalDate(utcTimeString, keepYear) {
+  const utcDateTime = new Date(utcTimeString);
+  
+  const options = {
+    month: 'short',
+    day: 'numeric'
+  };
+
+  // Append option based on keepYear
+  if (keepYear) {
+    options.year = 'numeric';
+  }
+
+  const formatter = new Intl.DateTimeFormat('en-US', options);
+  const localDate = formatter.format(utcDateTime);
+  
+  return localDate;
+}
+
 function HabitsTable({ habits, localUid, isHabitsUpdFinished, refetchHabits }) {
   const [logBtnStates, setLogBtnStates] = useState({});
 
@@ -269,17 +295,6 @@ function LogHistory({ habit }) {
     y: recordOnDate
   }
   
-  // Function to convert UTC time to local time and format it
-  const convertToLocalDate = (utcTimeString) => {
-    const utcDateTime = new Date(utcTimeString);
-
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const localDate = formatter.format(utcDateTime);
-
-    return localDate;
-  };
-
   // Function to toggle the visibility state
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -303,7 +318,7 @@ function LogHistory({ habit }) {
           </td>
         </tr>
         ) : (<></>)}
-      {/* Not displaying log as list, bcz it might get too long
+      {/* Commenting out log as list, bcz it might get too long
       {!isCollapsed && habit.records && habit.records.map((record, index) => (
         <tr key={record.Hid + index}>
           <td>{index}</td>
@@ -319,6 +334,7 @@ function LogHistory({ habit }) {
 // Child component: log history chart
 
 function ChartHabitLog({ logData }) {
+  const localDateX = logData.x.map(value => convertToLocalDate(value, false));
   const numericY = logData.y.map(value => value ? 1 : 0);
   const textY = logData.y.map(value => value ? "Done" : "zzz");
 
@@ -327,7 +343,7 @@ function ChartHabitLog({ logData }) {
       data={[
         {
         type: "bar",
-        x: logData.x, y: numericY,
+        x: localDateX, y: numericY,
         text: textY.map(String),
         textfont: {
           color: '#444',
@@ -347,8 +363,7 @@ function ChartHabitLog({ logData }) {
           pad: 0,
         },
         xaxis: {
-          type: 'date', // Treat x-axis values as date
-          tickformat: '%m-%d', // Date format for x-axis labels
+          type: 'category', // Treat x-axis values as date
           nticks: 8, // Specify the desired number of ticks on the x-axis
           tickfont: {
             size: 12

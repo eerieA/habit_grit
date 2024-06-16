@@ -67,7 +67,6 @@ function App() {
         // Update current habit by appending an array containing its records
         habit.records = habitRecords;
       }
-      console.log('Habits with records:', habits);
 
       // Store finalized habits into the state array
       setHabits(habits);
@@ -97,7 +96,6 @@ function App() {
   useEffect(() => {
     if (isHabitsUpdFinished) {
       console.log("isHabitsUpdFinished is true now.");
-      console.log("habits after:", habits);
     }    
   }, [isHabitsUpdFinished, habits]);
 
@@ -196,7 +194,6 @@ function AddHabitForm({ uid, onAddHabit }) {
           { Uid: uid, GoalFq: hFrequency, GoalFqType: hFqType, HDscr: hDescription },
         ])
         .select();
-      console.log("[openAddHabit] data is", data);
 
       if (error) {
         console.error('Error adding habit to Supabase:', error);

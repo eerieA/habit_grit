@@ -1,5 +1,5 @@
 import { useGoogleLogin } from '@react-oauth/google';
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import axios from 'axios';
 
 // Function that constructs the sign in/up form
